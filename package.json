@@ -1,0 +1,13 @@
+{
+  "name": "dialr",
+  "version": "1.0.0",
+  "description": "Dialr Live Deployment Service",
+  "main": "src/server.js",
+  "author": "Matthew Lohbihler",
+  "license": "MIT",
+  "repository": "https://bitbucket.org/mannabase/mannabase-server.git",
+  "scripts": {
+    "test": "jest --coverage",
+    "start": "nodemon src/server.js --ignore ./static/*"
+  }
+}

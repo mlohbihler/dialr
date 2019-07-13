@@ -1,6 +1,6 @@
 module.exports = {
   root: true,
-  extends: "standard",
+  extends: 'standard',
   env: {
     jest: true,
     node: true,
@@ -8,7 +8,12 @@ module.exports = {
   },
   rules: {
     // Custom overrides
-    'space-before-function-paren': [2, 'never'],
+    "space-before-function-paren": ['error', {
+      anonymous: 'never',
+      named: 'never',
+      asyncArrow: 'always'
+    }],
     'comma-dangle': 'off',
+    'func-call-spacing': 'off'
   }
 };

@@ -2,12 +2,36 @@
   "name": "dialr",
   "version": "1.0.0",
   "description": "Dialr Live Deployment Service",
-  "main": "src/server.js",
+  "main": "src/index.js",
   "author": "Matthew Lohbihler",
   "license": "MIT",
-  "repository": "https://bitbucket.org/mannabase/mannabase-server.git",
+  "repository": "https://github.com/mlohbihler/dialr.git",
   "scripts": {
     "test": "jest --coverage",
-    "start": "nodemon src/server.js --ignore ./static/*"
+    "start": "nodemon src/index.js --ignore ./static/*"
+  },
+  "dependencies": {
+    "compression": "^1.7.4",
+    "dateformat": "^3.0.3",
+    "dotenv": "^8.0.0",
+    "express": "^4.17.1",
+    "express-rate-limit": "^5.0.0",
+    "helmet": "^3.18.0",
+    "lodash": "^4.17.14",
+    "morgan": "^1.9.1",
+    "pg": "^7.11.0",
+    "pg-migration": "^3.0.0",
+    "rotating-file-stream": "^1.4.2",
+    "winston": "^3.2.1"
+  },
+  "devDependencies": {
+    "eslint": "^6.0.1",
+    "eslint-config-standard": "^13.0.1",
+    "eslint-plugin-import": "^2.18.0",
+    "eslint-plugin-node": "^9.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "jest": "^24.8.0",
+    "nodemon": "^1.19.1"
   }
 }

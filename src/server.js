@@ -1,4 +1,5 @@
 // Import
+const bodyParser = require('body-parser')
 const compression = require('compression')
 const express = require('express')
 const fs = require('fs')
@@ -36,6 +37,7 @@ module.exports = options => {
 
   app.use(helmet())
   app.use(compression())
+  app.use(bodyParser.json())
 
   // Rate limiting
   app.use('/api/', new RateLimit({

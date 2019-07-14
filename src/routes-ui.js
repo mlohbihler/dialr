@@ -1,5 +1,57 @@
 const express = require('express')
 
+// const admin = require('./handlers/admin')
+// const data = require('./handlers/data')
+// const profile = require('./handlers/profile')
+// const connection = require('./handlers/connection')
+// const search = require('./handlers/search')
+const session = require('./ui/session')
+const user = require('./ui/user')
+
 const router = express.Router()
+
+// router.post('/admin/approve-for-ubi', admin.approveForUbi)
+// router.get('/admin/get-user-data', admin.getUserData)
+// router.post('/admin/unfreeze-coins', admin.unfreezeCoins)
+
+// router.get('/data/countries', data.countries)
+// router.get('/data/next-distro', data.nextDistroDate)
+
+// router.delete('/profile', profile.deleteAccount)
+// router.patch('/profile/accept-tos', profile.acceptTos)
+// router.get('/profile/account-address', profile.getAccountAddress)
+// router.get('/profile/account-balance', profile.getAccountBalance)
+// router.get('/profile/account-transaction-history', profile.getAccountTransactionHistory)
+// router.post('/profile/change-password', profile.changePassword)
+// router.post('/profile/confirm-send-coins', profile.confirmSendCoins)
+// router.post('/profile/confirm-tfa', profile.confirmTFA)
+// router.post('/profile/deactivate-tfa', profile.deactivateTFA)
+// router.post('/profile/initiate-send-coins', profile.initiateSendCoins)
+// router.post('/profile/initiate-tfa', profile.initiateTFA)
+// router.post('/profile/move-coins', profile.moveCoins)
+// router.delete('/profile/profile-picture', profile.deleteProfilePic)
+// router.post('/profile/profile-picture', profile.uploadProfilePic)
+// router.get('/profile/query', search.searchUsers)
+// router.get('/profile/referral-counts', profile.referrals)
+// router.post('/profile/request-change-email', profile.requestChangeEmail)
+// router.post('/profile/send-coins', profile.sendCoins)
+// router.post('/profile/ubi-signup-name-address', profile.ubiSignupNameAddress)
+// router.patch('/profile/update-general-profile', profile.updatePrivacyAndName)
+// router.post('/profile/toggle-subscription', profile.toggleSubscribed)
+// router.post('/profile/verify-change-email', profile.verifyChangeEmailToken)
+
+// router.post('/connections/add', connection.requestAddConnection)
+// router.delete('/connections/reject', connection.requestRejectConnection)
+// router.get('/connections/requests', connection.getConnectionRequests)
+
+router.get('/session', session.getCurrentUser)
+router.post('/session', session.login)
+router.delete('/session', session.logout)
+
+router.post('/user', user.register)
+router.post('/user/activate-registration', user.activateRegistration)
+router.post('/user/resend-activation-email', user.resendActivationEmail)
+router.post('/user/request-password-reset', user.requestPasswordReset)
+router.post('/user/validate-password-reset-token', user.validatePasswordResetToken)
 
 module.exports = router

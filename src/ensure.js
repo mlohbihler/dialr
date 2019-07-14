@@ -1,6 +1,20 @@
 const { tie } = require('./common')
-const { isString } = require('lodash')
+const { isArray, isBoolean, isNumber, isString } = require('lodash')
 const validator = require('validator')
+
+function ensureArray(value, code, message) {
+  if (!isArray(value)) {
+    tie(code, message)
+  }
+  return value
+}
+
+function ensureBoolean(value, code, message) {
+  if (!isBoolean(value)) {
+    tie(code, message)
+  }
+  return value
+}
 
 function ensureEmail(value, code, message) {
   if (!isString(value) || !validator.isEmail(value)) {
@@ -11,6 +25,13 @@ function ensureEmail(value, code, message) {
 
 function ensureExists(value, code, message) {
   if (!value) {
+    tie(code, message)
+  }
+  return value
+}
+
+function ensureNumber(value, code, message) {
+  if (!isNumber(value)) {
     tie(code, message)
   }
   return value
@@ -39,6 +60,13 @@ function ensureString(value, code, message) {
   return value
 }
 
+function ensureStringLength(value, min, max, code, message) {
+  if ((min && value.length < min) || (max && value.length > max)) {
+    tie(code, message)
+  }
+  return value
+}
+
 function ensureUrlWithToken(input, code) {
   if (!isString(input)) {
     tie(code, 'url is missing or invalid')
@@ -50,9 +78,13 @@ function ensureUrlWithToken(input, code) {
 }
 
 module.exports = {
+  ensureArray,
+  ensureBoolean,
   ensureEmail,
   ensureExists,
+  ensureNumber,
   ensurePassword,
   ensureString,
+  ensureStringLength,
   ensureUrlWithToken
 }

@@ -108,11 +108,11 @@ function registerPartial(name, file) {
 // registerPartial('includes/title', 'includes/title.hbs')
 // registerPartial('layouts/base', 'layouts/base.hbs')
 
-module.exports.createSingleUseToken = async (db, duration, content) => {
+module.exports.createSingleUseToken = async (db, durationSeconds, content) => {
   const key = randToken.generate(64)
   await db.query(`
     INSERT INTO single_use_tokens (token, expiry, content)
-    VALUES ($1, NOW() + interval '${duration} seconds', $2)
+    VALUES ($1, NOW() + interval '${durationSeconds} seconds', $2)
     `, [key, content])
   return key
 }

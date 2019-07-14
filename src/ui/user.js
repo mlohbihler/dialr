@@ -1,4 +1,5 @@
 // TODO create a process that purges users with expired email validations.
+// TODO create templates for the email content below
 
 const { generateDbPassword, sign, tie, verify } = require('../common')
 const { ensureEmail, ensureExists, ensurePassword, ensureString, ensureUrlWithToken } = require('../ensure')
@@ -13,7 +14,8 @@ const { respond } = require('../responses')
 // const { respond } = require('../responses')
 // const { ensureUrlWithToken, generateDbPassword, getUnsubscribeUrl, sign, tie, validatePassword, verify } = require('../util')
 
-const PASSWORD_RESET_TOKEN_EXPIRY = 60 * 60 // One hour
+const ACCOUNT_VERIFICATION_EXPIRY_HOURS = 1 // One hour
+const PASSWORD_RESET_TOKEN_EXPIRY_HOURS = 1 // One hour
 
 module.exports.register = (req, res) => {
   apiPipeline(req, res, [dbtx], async () => {
@@ -50,7 +52,10 @@ module.exports.register = (req, res) => {
     const userId = userRs.rows[0].user_id
 
     // Insert the email verification record
-    await db.query(`INSERT INTO email_verifications (user_id) VALUES ($1)`, [userId])
+    await db.query(`
+      INSERT INTO email_verifications (user_id, expiry) VALUES
+        ($1, NOW() + interval '${ACCOUNT_VERIFICATION_EXPIRY_HOURS} hour')
+      `, [userId])
 
     // Send the activation email to the user.
     await sendActivationEmail(email, url, logger, 'user-register-6')
@@ -140,7 +145,7 @@ module.exports.requestPasswordReset = (req, res) => {
     }
 
     // const rec = rs.rows[0]
-    const token = await createSingleUseToken(req.db, PASSWORD_RESET_TOKEN_EXPIRY, { email: email })
+    const token = await createSingleUseToken(req.db, PASSWORD_RESET_TOKEN_EXPIRY_HOURS * 60 * 60, { email: email })
 
     await sendUiEmail({
       to: email,
@@ -196,7 +201,7 @@ Hey ${email},
 
 Here's your token: ${url.replace('{token}', Buffer.from(sign('activate:' + email)).toString('hex'))}
 
-You've got ${process.env.accountActivationDays} days to use it to validate your email address
+You've got ${ACCOUNT_VERIFICATION_EXPIRY_HOURS} hour to use it to validate your email address
     `
     // data: {
     //   username,

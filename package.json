@@ -27,6 +27,7 @@
     "pg-migration": "^3.0.0",
     "rand-token": "^0.4.0",
     "rotating-file-stream": "^1.4.2",
+    "uuid": "^3.3.2",
     "validator": "^11.1.0",
     "winston": "^3.2.1"
   },

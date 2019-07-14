@@ -21,5 +21,6 @@ function errorObject(code, message, params) {
 module.exports = {
   die,
   error,
+  errorObject,
   respond
 }

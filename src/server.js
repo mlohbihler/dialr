@@ -8,10 +8,11 @@ const http = require('http')
 const https = require('https')
 const morgan = require('morgan')
 const path = require('path')
+const maintenance = require('./jobs/maintenance')
 const RateLimit = require('express-rate-limit')
 const { errorObject } = require('./responses')
 const rfs = require('rotating-file-stream')
-const stateRefresher = require('./stateRefresher')
+const stateRefresher = require('./jobs/stateRefresher')
 const mi = require('./routes-mi')
 const ui = require('./routes-ui')
 
@@ -27,7 +28,9 @@ module.exports = options => {
     requests: {} // Map of { experiment id, request id } to results
   }
 
+  // Start jobs
   stateRefresher(options)
+  maintenance(options)
 
   // // Assume that we're behind a load balancer.
   // app.set('trust proxy', true)

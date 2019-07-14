@@ -1,4 +1,8 @@
-const { jobPipeline, singleInstance, timer } = require('./middleware')
+/**
+ * Creates a cache of data from the database to avoid having to make
+ * regular hits for data that should rarely change.
+ */
+const { jobPipeline, singleInstance, timer } = require('../middleware')
 
 module.exports = async opts => {
   opts.logger.info('Starting state refresher')
@@ -40,7 +44,7 @@ async function load(opts) {
 
     const experimentPromise = db.query(`
       SELECT u.user_id, u.active AS user_active,
-        e.experiment_id, e.experiment_uuid, e.request_ttl, e.active AS experiment_active,
+        e.experiment_id, e.experiment_uuid, e.request_ttl, e.running, e.active AS experiment_active,
         b.branch, b.probability
       FROM users u
         JOIN experiments e ON u.user_id = e.user_id
@@ -50,7 +54,7 @@ async function load(opts) {
       ORDER BY e.experiment_uuid, b.sort
       `, [min, max])
 
-    // While that's goind on, let's dump expired request data.
+    // While that's going on, let's dump expired request data.
     for (const [k, e] of Object.entries(requests)) {
       if (e.expiry.getTime() < lastLoadTime.getTime()) {
         logger.info(`Purging request ${k}, expiry=${e.expiry}, now=${lastLoadTime}`)
@@ -79,6 +83,7 @@ async function load(opts) {
       const uuid = experimentBranches[index].experiment_uuid
       const userId = experimentBranches[index].user_id
       const userActive = experimentBranches[index].user_active
+      const running = experimentBranches[index].running
       const experimentActive = experimentBranches[index].experiment_active
       const experiment = {
         experimentId: experimentBranches[index].experiment_id,
@@ -104,9 +109,9 @@ async function load(opts) {
           logger.info(`Removing experiments for user ${userId}`)
           delete experiments[userId]
         }
-      } else if (!experimentActive) {
-        // The experiment has been deactivated. Find the entry in the experiments map for the
-        // user, and delete the experiment from it.
+      } else if (!experimentActive || !running) {
+        // The experiment has been turned off or deactivated. Find the entry in the experiments
+        // map for the user, and delete the experiment from it.
         const userExperiments = experiments[userId]
         if (userExperiments) {
           if (userExperiments[uuid]) {

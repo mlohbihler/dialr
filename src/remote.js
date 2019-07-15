@@ -102,11 +102,7 @@ function registerPartial(name, file) {
   Handlebars.registerPartial(name, hbs)
 }
 
-// registerPartial('includes/button', 'includes/button.hbs')
-// registerPartial('includes/normal', 'includes/normal.hbs')
-// registerPartial('includes/strong', 'includes/strong.hbs')
-// registerPartial('includes/title', 'includes/title.hbs')
-// registerPartial('layouts/base', 'layouts/base.hbs')
+registerPartial('includes/footer', 'footer.hbs')
 
 module.exports.createSingleUseToken = async (db, durationSeconds, content) => {
   const key = randToken.generate(64)

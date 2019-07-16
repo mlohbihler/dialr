@@ -8,10 +8,9 @@ module.exports.create = (req, res) => {
   apiPipeline(req, res, [user(true)], async () => {
     const { db, user } = req
 
-    // Users can only have max 3 access keys. (TODO configurable?)
     const countRs = await db.query('SELECT COUNT(*) FROM access_keys WHERE user_id = $1 AND active', [user.user_id])
-    if (countRs.rows[0].count >= 3) {
-      tie('accessKeys-create-1', 'You already have the maximum number of access keys (3)')
+    if (countRs.rows[0].count >= user.max_access_keys) {
+      tie('accessKeys-create-1', `You already have your maximum number of access keys (${user.max_access_keys})`)
     }
 
     // Otherwise, create a new key

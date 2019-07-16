@@ -112,12 +112,6 @@ module.exports = options => {
   }
 }
 
-//     // Enable JSON body parsing
-//     app.use(helmet())
-//     app.use(compression())
-//     app.use(bodyParser.raw())
-//     app.use(bodyParser.json())
-
 //     // CORS: enable cross domain request handling.
 //     if (process.env.NODE_ENV === 'production') {
 //       console.log('Starting production instance')

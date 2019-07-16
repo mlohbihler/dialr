@@ -39,8 +39,12 @@ module.exports.login = (req, res) => {
     // Prevent email scraping by using the same error code
     testPasswordsAreEqual(user.password_hash, password, 'session-login-3', 'User not found')
 
+    if (!user.verified) {
+      tie('session-login-4', `User's email address is not verified`)
+    }
+
     if (!user.active) {
-      tie('session-login-4', 'User is not active')
+      tie('session-login-5', 'User is not active')
     }
 
     const cookieData = {

@@ -8,13 +8,12 @@ module.exports.create = (req, res) => {
   apiPipeline(req, res, [user(true), dbtx], async () => {
     const { db, user, body } = req
 
-    // Users can only have max 3 experiments. (TODO configurable?)
     const countRs = await db.query('SELECT COUNT(*) FROM experiments WHERE user_id = $1 AND active', [user.user_id])
-    if (countRs.rows[0].count >= 3) {
-      tie('experiments-create-1', 'You already have the maximum number of experiments (3)')
+    if (countRs.rows[0].count >= user.max_experiments) {
+      tie('experiments-create-1', `You already have your maximum number of experiments (${user.max_experiments})`)
     }
 
-    validateExperimentInput(body)
+    validateExperimentInput(req.user, body)
 
     // Create the new experiment
     const uuid = uuidv4()
@@ -83,7 +82,7 @@ module.exports.update = (req, res) => {
 
     const uuid = ensureString(body.uuid, 'experiments-update-1', `Missing or invalid 'uuid'`)
 
-    validateExperimentInput(body)
+    validateExperimentInput(req.user, body)
 
     // Save the experiment
     const experimentRs = await db.query(`
@@ -118,7 +117,7 @@ module.exports.remove = (req, res) => {
   })
 }
 
-function validateExperimentInput(body) {
+function validateExperimentInput(user, body) {
   // Validate the given object.
   const title = ensureString(body.title, 'experiments-upsert-1', `Missing or invalid 'title'`)
   const description = ensureString(body.description, 'experiments-upsert-2', `Missing or invalid 'description'`)
@@ -132,8 +131,8 @@ function validateExperimentInput(body) {
   }
 
   const branches = ensureArray(body.branches, 'experiments-upsert-8', `Missing or invalid 'branches'`)
-  if (branches.length < 2 || branches.length > 10) {
-    tie('experiments-upsert-9', `An experiment must have 2-10 branches`)
+  if (branches.length < 2 || branches.length > user.max_branches) {
+    tie('experiments-upsert-9', `An experiment must have at least 2 branches, and not more than your maximum of ${user.max_branches}`)
   }
   const valueSet = new Set()
   branches.forEach(branch => {

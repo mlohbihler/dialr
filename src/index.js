@@ -1,5 +1,6 @@
 // Configuration
 require('dotenv').config()
+const { sendEmail } = require('./remote')
 
 // Import
 const { Pool } = require('pg')
@@ -54,9 +55,31 @@ const go = async () => {
   }))
     .then(() => {
       require('./server')({ db, logger })
+      return sendStartupEmail()
     })
     .catch(err => {
       logger.error(err)
+      return sendStartupEmail(err)
     })
 }
 go()
+
+async function sendStartupEmail(err) {
+  if (process.env.NODE_ENV === 'development') {
+    // Dev has a lot of startups.
+    return
+  }
+
+  let text
+  if (err) {
+    text = err.stack
+  } else {
+    text = 'Oh yeah!'
+  }
+
+  sendEmail({
+    to: process.env.startupEmailTo,
+    subject: err ? 'Error starting Dialr' : 'Dialr startup successful',
+    text,
+  })
+}

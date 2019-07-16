@@ -1,9 +1,17 @@
-// const dateformat = require('dateformat')
+const { sendEmail } = require('./remote')
 
 function die(req, res, err) {
   req.logger.error(err)
   const msg = process.env.NODE_ENV === 'production' ? 'Uh oh, internal server error' : err.message
   res.status(500).json(errorObject('server-error', msg))
+
+  if (process.env.NODE_ENV !== 'development') {
+    sendEmail({
+      to: process.env.startupEmailTo,
+      subject: 'Dialr error',
+      text: err.stack
+    })
+  }
 }
 
 function error(res, code, message, params) {

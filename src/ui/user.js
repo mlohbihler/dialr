@@ -1,6 +1,3 @@
-// TODO create a process that purges users with expired email validations.
-// TODO create templates for the email content below
-
 const { generateDbPassword, sign, tie, verify } = require('../common')
 const { ensureEmail, ensureExists, ensurePassword, ensureString, ensureUrlWithToken } = require('../ensure')
 const { apiPipeline, dbtx } = require('../middleware')

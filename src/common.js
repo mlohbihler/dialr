@@ -101,11 +101,10 @@ function throwInputError(code, message, params) {
 // This query is used in multiple places in the app, and it should dovetail with
 // writeUserRsToObject below, so we define it here.
 const userQuery = `
-  SELECT u.user_id, u.email, u.password_hash, u.active,
+  SELECT u.user_id, u.email, u.password_hash, u.active, u.max_access_keys, u.max_experiments, u.max_branches,
     CASE WHEN e.user_id IS NULL THEN true ELSE false END AS verified
   FROM users u
-    LEFT JOIN email_verifications e ON u.user_id = e.user_id
-  `
+    LEFT JOIN email_verifications e ON u.user_id = e.user_id`
 
 function writeUserRsToObject(user) {
   if (!user) {

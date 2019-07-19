@@ -15,9 +15,10 @@ router.get('/branch', (req, res) => {
   apiPipeline(req, res, [timer('branch')], async () => {
     const accessKey = ensureExists(req.headers['x-access-key'], 'branch-1', 'accessKey empty or not provided')
     const userId = ensureExists(accessKeys[accessKey], 'branch-2', 'Invalid accessKey')
-    const experimentUuid = ensureExists(req.query.xid, 'branch-3', 'xid (experiment id) empty or not provided')
+    const experimentUuid = ensureExists(req.query.uuid, 'branch-3', 'uuid empty or not provided')
     const requestId = ensureExists(req.query.rid, 'branch-4', 'rid (request id) empty or not provided')
     const outcome = req.query.outcome
+    let experiment
 
     // Check if the request already exists
     const requestKey = experimentUuid + '$$$$' + requestId
@@ -28,15 +29,15 @@ router.get('/branch', (req, res) => {
       logger.info('Branch cache miss')
 
       // Didn't find the request locally. Find the experiment.
-      const userExperiments = ensureExists(experiments[userId], 'branch-5', 'Invalid xid (experiment id)')
-      const experiment = ensureExists(userExperiments[experimentUuid], 'branch-5', 'Invalid xid (experiment id)')
+      const userExperiments = ensureExists(experiments[userId], 'branch-5', 'Invalid uuid')
+      experiment = ensureExists(userExperiments[experimentUuid], 'branch-5', 'Invalid uuid')
 
       // Pick a branch from the experiment.
       const { branches } = experiment
       if (!branches.length) {
         tie('branch-6', 'Misconfigured experiment: no branches')
       }
-      const rand = Math.floor(Math.random() * experiment.probabilitySum)
+      const rand = Math.floor(Math.random() * experiment.probabilitySum) + 1
       // TODO could also use a hash of the requestId as the rand, which would make
       // the branch more deterministic for the client code.
       let branch
@@ -58,7 +59,8 @@ router.get('/branch', (req, res) => {
 
       request = {
         branch: rs.rows[0].branch,
-        expiry: rs.rows[0].expiry
+        expiry: rs.rows[0].expiry,
+        experimentId: experiment.experimentId
       }
 
       // Add to the cache if the request is not already expired
@@ -72,8 +74,12 @@ router.get('/branch', (req, res) => {
 
     respond(res, request)
 
-    // TODO add some post write stuff
-    // - telemetry send with xid, rid, branch, runtime
+    // Record the hit and do any other post write stuff
+    db.query('UPDATE experiments SET hits = hits + 1 WHERE experiment_id = $1', [request.experimentId])
+      .catch(err => {
+        req.logger.error('Error updating hit count', err)
+      })
+    // - telemetry send with uuid, rid, branch, outcome, runtime
   })
 })
 

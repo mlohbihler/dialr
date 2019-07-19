@@ -1,0 +1,1 @@
+ALTER TABLE experiments ADD hits INTEGER NOT NULL DEFAULT 0;

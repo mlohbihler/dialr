@@ -1,3 +1,6 @@
+/**
+ * Copyright Matthew Lohbihler 2019
+ */
 // Configuration
 require('dotenv').config()
 const { sendEmail } = require('./remote')

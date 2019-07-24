@@ -1,8 +1,10 @@
 /**
+ * Copyright Matthew Lohbihler 2019
+ *
  * Creates a cache of data from the database to avoid having to make
  * regular hits for data that should rarely change.
  */
-const { jobPipeline, singleInstance, timer } = require('../middleware')
+const { jobPipeline, singleInstance, timer } = require('../pipeline')
 
 module.exports = async opts => {
   opts.logger.info('Starting state refresher')

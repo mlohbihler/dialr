@@ -1,5 +1,8 @@
+/**
+ * Copyright Matthew Lohbihler 2019
+ */
 const { ensureString } = require('../ensure')
-const { apiPipeline, user } = require('../middleware')
+const { apiPipeline, user } = require('../pipeline')
 const { respond } = require('../responses')
 const randToken = require('rand-token')
 const { tie } = require('../common')

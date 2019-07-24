@@ -1,5 +1,8 @@
+/**
+ * Copyright Matthew Lohbihler 2019
+ */
 const { ensureString } = require('../ensure')
-const { apiPipeline, user } = require('../middleware')
+const { apiPipeline, user } = require('../pipeline')
 // const isString = require('lodash/isString')
 // const { validateOTP, validateRecaptcha } = require('../remote')
 const { respond } = require('../responses')

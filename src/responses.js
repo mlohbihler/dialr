@@ -1,3 +1,6 @@
+/**
+ * Copyright Matthew Lohbihler 2019
+ */
 const { sendEmail } = require('./remote')
 
 function die(req, res, err) {

@@ -1,6 +1,9 @@
+/**
+ * Copyright Matthew Lohbihler 2019
+ */
 const { generateDbPassword, sign, tie, verify } = require('../common')
 const { ensureEmail, ensureExists, ensurePassword, ensureString, ensureUrlWithToken } = require('../ensure')
-const { apiPipeline, dbtx } = require('../middleware')
+const { apiPipeline, dbtx } = require('../pipeline')
 const { consumeSingleUseToken, createSingleUseToken, sendEmail } = require('../remote')
 const { respond } = require('../responses')
 

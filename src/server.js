@@ -1,3 +1,6 @@
+/**
+ * Copyright Matthew Lohbihler 2019
+ */
 // Import
 const bodyParser = require('body-parser')
 const compression = require('compression')

@@ -1,3 +1,6 @@
+/**
+ * Copyright Matthew Lohbihler 2019
+ */
 const fs = require('fs')
 const Handlebars = require('handlebars')
 const { isArray, isObject, isString } = require('lodash')

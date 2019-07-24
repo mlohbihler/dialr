@@ -1,3 +1,6 @@
+/**
+ * Copyright Matthew Lohbihler 2019
+ */
 const { tie } = require('./common')
 const { isArray, isBoolean, isNumber, isString } = require('lodash')
 const validator = require('validator')

@@ -1,4 +1,6 @@
 /**
+ * Copyright Matthew Lohbihler 2019
+ *
  * Runs regular database maintenance, including:
  * - deleting users with expired email verifications
  * - deleting expired single use tokens
@@ -8,7 +10,7 @@
  *
  * It's ok, albeit a bit overkill, if this job runs on all instances of this server.
  */
-const { jobPipeline, singleInstance, timer } = require('../middleware')
+const { jobPipeline, singleInstance, timer } = require('../pipeline')
 
 module.exports = async opts => {
   opts.logger.info('Starting maintenance')

@@ -1,4 +1,6 @@
 /**
+ * Copyright Matthew Lohbihler 2019
+ *
  * This module is for functions that do not cause side effects, such that they
  *  are safe for use in unit tests. (I.e. they do not need to be mocked.)
  */

@@ -1,3 +1,6 @@
+/**
+ * Copyright Matthew Lohbihler 2019
+ */
 const { userQuery, getCookie, inputErrorMessage, sessionTokenName, tie, verify } = require('./common')
 const { die, error } = require('./responses')
 
@@ -185,7 +188,7 @@ async function jobPipeline(logger, comps, after) {
  *
  * @param {Object} data has of values required by the components
  * @param {Array} comps the list of components to pipeline
- * @param {Function} after the function to run in the middle of the pipeline
+ * @param {Function} after the function(req, res) to run in the middle of the pipeline
  */
 async function pipeline(data, comps, after) {
   const next = async () => {
@@ -202,7 +205,7 @@ async function pipeline(data, comps, after) {
       }
       return comp(data, next)
     }
-    return after()
+    return after(data.req, data.res)
   }
   return next()
 }

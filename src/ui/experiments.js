@@ -1,5 +1,8 @@
+/**
+ * Copyright Matthew Lohbihler 2019
+ */
 const { ensureArray, ensureBoolean, ensureNumber, ensureString, ensureStringLength } = require('../ensure')
-const { apiPipeline, dbtx, user } = require('../middleware')
+const { apiPipeline, dbtx, user } = require('../pipeline')
 const { respond } = require('../responses')
 const { tie } = require('../common')
 const uuidv4 = require('uuid/v4')
@@ -135,17 +138,22 @@ function validateExperimentInput(user, body) {
     tie('experiments-upsert-9', `An experiment must have at least 2 branches, and not more than your maximum of ${user.max_branches}`)
   }
   const valueSet = new Set()
+  let probabilitySum = 0
   branches.forEach(branch => {
     ensureString(branch.value, 'experiments-upsert-10', `Missing or invalid 'branch.value'`)
     ensureStringLength(branch.value, 1, 10, 'experiments-upsert-11', `'branch.value' must be 1-10 characters`)
     ensureNumber(branch.probability, 'experiments-upsert-12', `Missing or invalid 'branch.probability'`)
-    if (branch.probability < 1) {
-      tie('experiments-upsert-13', `'branch.probability' must be greater than 0`)
+    if (branch.probability < 0) {
+      tie('experiments-upsert-13', `'branch.probability' must be >= 0`)
     }
     valueSet.add(branch.value)
+    probabilitySum += branch.probability
   })
   if (valueSet.size !== branches.length) {
     tie('experiments-upsert-14', `All branch values must be unique`)
+  }
+  if (probabilitySum < 1) {
+    tie('experiments-upsert-15', `Probability sum must be > 0`)
   }
 }
 

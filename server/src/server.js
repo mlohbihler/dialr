@@ -45,6 +45,23 @@ module.exports = options => {
   app.use(compression())
   app.use(bodyParser.json())
 
+  // CORS: enable cross domain request handling.
+  if (process.env.NODE_ENV === 'production') {
+    // ... unless we're in production. No need for it here.
+    logger.info('Starting production instance, no CORS')
+  } else {
+    logger.info('Enabling CORS')
+    app.use(function(req, res, next) {
+      res.set({
+        'Access-Control-Allow-Origin': req.headers.origin,
+        'Access-Control-Allow-Credentials': true,
+        'Access-Control-Allow-Headers': 'Accept,Cache-Control,Content-Type,Cookie,Origin,X-Content-Type,X-Requested-With,X-XSRF-Token',
+        'Access-Control-Allow-Methods': 'DELETE,GET,OPTIONS,POST,PUT,PATCH'
+      })
+      next()
+    })
+  }
+
   // Rate limiting
   app.use('/api/', new RateLimit({
     windowMs: 60 * 1000, // 1 minute
@@ -114,19 +131,3 @@ module.exports = options => {
     logger.info('Dialr HTTPS server not started')
   }
 }
-
-//     // CORS: enable cross domain request handling.
-//     if (process.env.NODE_ENV === 'production') {
-//       console.log('Starting production instance')
-//     } else {
-//       console.log('Enabling CORS')
-//       app.use(function(req, res, next) {
-//         res.set({
-//           'Access-Control-Allow-Origin': req.headers.origin,
-//           'Access-Control-Allow-Credentials': true,
-//           'Access-Control-Allow-Headers': 'Accept,Cache-Control,Content-Type,Cookie,Origin,X-Content-Type,X-Requested-With,X-XSRF-Token',
-//           'Access-Control-Allow-Methods': 'DELETE,GET,OPTIONS,POST,PUT,PATCH'
-//         })
-//         next()
-//       })
-//     }

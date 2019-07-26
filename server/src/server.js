@@ -92,18 +92,18 @@ module.exports = options => {
   // Set the routes
   app.use('/mi', mi)
   app.use('/ui', ui)
-  // app.use(express.static('static'))
-  // app.get('*', (req, res, next) => {
-  //   // Route requests for specific URLs to the index.html file if they were requested
-  //   // as text/html. This allows for initial requests for URLs like '/ref' and '/register'
-  //   // to make it to the client. Otherwise they would be 404s.
-  //   if (req.headers.accept && req.headers.accept.indexOf('text/html') > -1) {
-  //     // Path names have to be absolute.
-  //     res.sendFile(path.join(__dirname, '..', 'static', 'index.html'))
-  //   } else {
-  //     next()
-  //   }
-  // })
+  app.use(express.static('static'))
+  app.get('*', (req, res, next) => {
+    // Route requests for specific URLs to the index.html file if they were requested
+    // as text/html. This allows for initial requests for URLs like '/about' and '/register'
+    // to make it to the client. Otherwise they would be 404s.
+    if (req.headers.accept && req.headers.accept.indexOf('text/html') > -1) {
+      // Path names have to be absolute.
+      res.sendFile(path.join(__dirname, '..', 'static', 'index.html'))
+    } else {
+      next()
+    }
+  })
   app.use((req, res) => res.status(404).send(errorObject('not-found', req.originalUrl + ' not found')))
 
   // Start HTTP the listener

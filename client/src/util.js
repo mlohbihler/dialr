@@ -1,5 +1,5 @@
-// import { get } from './api'
-// import store from './store'
+import { get } from './api'
+import store from './store'
 
 export function localUrl(path) {
   const u = window.location
@@ -11,65 +11,33 @@ export function localUrl(path) {
 //   return `${u.protocol}//${process.env.STATIC_HOST_BASE}${path}`
 // }
 
-// export async function refreshUserData() {
-//   const result = await get('/session')
+export async function refreshUserData() {
+  const result = await get('/session')
 
-//   // Indicate in the store that the user data has been loaded.
-//   store.commit('setUserDataLoaded')
-//   if (result.error) {
-//     if (result.error.code === 'not-authenticated') {
-//       store.commit('setUserData', null)
-//       return null
-//     }
+  // Indicate in the store that the user data has been loaded.
+  store.commit('setUserDataLoaded')
+  if (result.error) {
+    if (result.error.code === 'not-authenticated') {
+      store.commit('setUserData', null)
+      return null
+    }
 
-//     console.log('ensureAuthenticated user is not authenticated', result.error.code)
-//     throw Error(result.error)
-//   }
+    console.log('ensureAuthenticated user is not authenticated', result.error.code)
+    throw Error(result.error)
+  }
 
-//   // Put the user data into the store and continue with the route change.
-//   store.commit('setUserData', result.user)
-//   return result
-// }
-
-// /**
-//  * Retries a predicate at the given rate until it is truthy, at which time it runs the callback.
-//  * @param {Object} predicate the predicate to test
-//  * @param {*} time the amount of time to wait before trying the predicate again
-//  * @param {*} callback the callback to run when the predicate returns truthy
-//  */
-// export function poll(predicate, time, callback) {
-//   if (predicate()) {
-//     callback()
-//   } else {
-//     setTimeout(() => poll(predicate, time, callback), time)
-//   }
-// }
-
-// export function loadScript(id, url) {
-//   if (!document.getElementById(id)) {
-//     const promise = new Promise((resolve, reject) => {
-//       let script = document.createElement('script')
-//       script.id = id
-//       script.onload = () => resolve()
-//       script.async = true
-//       script.src = url
-//       document.head.appendChild(script)
-//     })
-//     return promise
-//   }
-//   return Promise.resolve()
-// }
+  // Put the user data into the store and continue with the route change.
+  store.commit('setUserData', result.user)
+  return result
+}
 
 /**
  * This, too, is needed for unit tests.
  */
 export default {
-//   NETWORK_FEE,
-//   loadScript,
   localUrl,
-//   poll,
-//   refreshUserData,
-//   staticUrl
+  refreshUserData,
+  // staticUrl
 }
 
 //
@@ -128,29 +96,6 @@ export default {
 
 // export function dateToTs(d) {
 //   return d ? d.getTime() : null
-// }
-
-// export function refreshUserData() {
-//   return new Promise((resolve, reject) => {
-//     get('/session')
-//       .then(result => {
-//         // Indicate in the store that the user data has been loaded.
-//         store.commit('setUserDataLoaded')
-//         if (result.error) {
-//           if (result.error.code === 'not-authenticated') {
-//             store.commit('setUserData', { userData: null })
-//             resolve(null)
-//           } else {
-//             console.log('ensureAuthenticated user is not authenticated', result.error.code)
-//             reject(Error(result.error))
-//           }
-//         } else {
-//           // Put the user data into the store and continue with the route change.
-//           store.commit('setUserData', { userData: result })
-//           resolve(result)
-//         }
-//       })
-//   })
 // }
 
 // export function findKeywordsIn(keywords) {

@@ -1,5 +1,5 @@
 /**
- * Copyright Matthew Lohbihler 2019
+ * Copyright Serotonin Software 2019
  */
 const branch = require('./mi/branch')
 const express = require('express')

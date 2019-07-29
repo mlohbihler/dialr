@@ -1,5 +1,5 @@
 /**
- * Copyright Matthew Lohbihler 2019
+ * Copyright Serotonin Software 2019
  */
 const { userQuery, getCookie, inputErrorMessage, sessionTokenName, tie, verify } = require('./common')
 const { die, error } = require('./responses')

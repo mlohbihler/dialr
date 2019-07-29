@@ -1,5 +1,5 @@
 /**
- * Copyright Matthew Lohbihler 2019
+ * Copyright Serotonin Software 2019
  *
  * This is the machine interface (MI). Requests are made from your code to this
  * interface to determine what branch should be followed. This is as opposed to

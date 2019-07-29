@@ -1,3 +1,4 @@
+<!-- Copyright Serotonin Software 2019 -->
 <template>
   <div class="home">
     <img alt="DiaLR logo" src="../assets/dialr-lg.png">
@@ -12,7 +13,10 @@
       wherever in your code you need them.
     </p>
     <pre class="code">
-      const branch = await dialr('experiment-id', 'my-request-id')
+      // Ask dialr for a branch to follow. The last parameter is the
+      // default value in case of failure.
+      const branch = await dialr('experiment-id', 'my-request-id', 'A')
+
       if (branch === 'A') {
         // You define the branch values, so they can be
         // and mean anything you want.
@@ -41,10 +45,10 @@
     </p>
     <p>
       DiaLR is open source code, so you can download and install it to run in your own environment.
-      But you can also use a super-fast <a href="https://dialr.org">cloud version</a> of it too.
+      But you can also use a super-fast <a href="https://dialr.org">cloud version</a> of it too. As
+      you'll see, DiaLR can be (and should be!) configured with values that are only meaningful to
+      you, so you never need to share sensitive data.
     </p>
-
-    <copy>&copy; Serotonin Software 2019</copy>
   </div>
 </template>
 
@@ -89,10 +93,6 @@ export default {
   }
   caption.code {
     display: block;
-  }
-  copy {
-    font-size: smaller;
-    color: $grey;
   }
 }
 </style>

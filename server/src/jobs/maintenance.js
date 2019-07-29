@@ -1,5 +1,5 @@
 /**
- * Copyright Matthew Lohbihler 2019
+ * Copyright Serotonin Software 2019
  *
  * Runs regular database maintenance, including:
  * - deleting users with expired email verifications

@@ -1,3 +1,4 @@
+<!-- Copyright Serotonin Software 2019 -->
 <template>
   <div>
     This is the logout page

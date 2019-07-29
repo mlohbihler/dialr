@@ -1,5 +1,5 @@
 /**
- * Copyright Matthew Lohbihler 2019
+ * Copyright Serotonin Software 2019
  */
 const { sendEmail } = require('./remote')
 

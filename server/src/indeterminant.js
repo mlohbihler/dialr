@@ -1,5 +1,5 @@
 /**
- * Copyright Matthew Lohbihler 2019
+ * Copyright Serotonin Software 2019
  *
  * This module wraps a number of indeterminant functions so that they can be
  * mocked easily.

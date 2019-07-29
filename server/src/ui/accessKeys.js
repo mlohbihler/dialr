@@ -1,5 +1,5 @@
 /**
- * Copyright Matthew Lohbihler 2019
+ * Copyright Serotonin Software 2019
  */
 const { ensureString } = require('../ensure')
 const { apiPipeline, user } = require('../pipeline')

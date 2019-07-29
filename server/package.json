@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Dialr Live Deployment Service",
   "main": "src/index.js",
-  "author": "Matthew Lohbihler",
+  "author": "Serotonin Software",
   "license": "MIT",
   "repository": "https://github.com/mlohbihler/dialr.git",
   "scripts": {

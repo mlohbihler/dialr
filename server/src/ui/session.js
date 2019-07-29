@@ -1,10 +1,8 @@
 /**
- * Copyright Matthew Lohbihler 2019
+ * Copyright Serotonin Software 2019
  */
-const { ensureString } = require('../ensure')
+const { ensureNonEmptyString } = require('../ensure')
 const { apiPipeline, user } = require('../pipeline')
-// const isString = require('lodash/isString')
-// const { validateOTP, validateRecaptcha } = require('../remote')
 const { respond } = require('../responses')
 const { userQuery, sessionTokenName, sign, testPasswordsAreEqual, tie, writeUserRsToObject } = require('../common')
 
@@ -13,8 +11,8 @@ const loginTokenExpiry = 1000 * 60 * 60 * 24 * 30 // 30 days
 module.exports.login = (req, res) => {
   apiPipeline(req, res, [], async () => {
     const { body } = req
-    const emailInput = ensureString(body.email, 'session-login-1', 'Invalid email')
-    const password = ensureString(body.password, 'session-login-2', 'Invalid password')
+    const emailInput = ensureNonEmptyString(body.email, 'session-login-1', 'Invalid email')
+    const password = ensureNonEmptyString(body.password, 'session-login-2', 'Invalid password')
 
     // TODO recaptcha
     // const recaptchaResponse = req.body.recaptchaResponse

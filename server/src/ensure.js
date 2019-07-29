@@ -1,5 +1,5 @@
 /**
- * Copyright Matthew Lohbihler 2019
+ * Copyright Serotonin Software 2019
  */
 const { tie } = require('./common')
 const { isArray, isBoolean, isNumber, isString } = require('lodash')
@@ -20,7 +20,7 @@ function ensureBoolean(value, code, message) {
 }
 
 function ensureEmail(value, code, message) {
-  if (!isString(value) || !validator.isEmail(value)) {
+  if (!isString(value) || !validator.isEmail(value.trim())) {
     tie(code, message)
   }
   return value.trim().toLowerCase()
@@ -31,6 +31,13 @@ function ensureExists(value, code, message) {
     tie(code, message)
   }
   return value
+}
+
+function ensureNonEmptyString(input, code, message) {
+  if (!isString(input) || !input.trim()) {
+    tie(code, message)
+  }
+  return input.trim()
 }
 
 function ensureNumber(value, code, message) {
@@ -64,7 +71,7 @@ function ensureString(value, code, message) {
 }
 
 function ensureStringLength(value, min, max, code, message) {
-  if ((min && value.length < min) || (max && value.length > max)) {
+  if (!isString(value) || (min && value.length < min) || (max && value.length > max)) {
     tie(code, message)
   }
   return value
@@ -85,9 +92,101 @@ module.exports = {
   ensureBoolean,
   ensureEmail,
   ensureExists,
+  ensureNonEmptyString,
   ensureNumber,
   ensurePassword,
   ensureString,
   ensureStringLength,
   ensureUrlWithToken
 }
+
+// const { isEmpty, isInteger, isPlainObject, isUndefined, size } = require('lodash')
+
+// /**
+//  * Used to validate ids that are passed via query parameter.
+//  * @param {String} input the ids to validate
+//  * @param {*} code the error code
+//  * @param {*} message the error message
+//  * @param {*} params the error parameters
+//  */
+// function ensureId(input, code, message, params) {
+//   if (!/^[0-9]+$/.test(input)) {
+//     tie(code, message, params)
+//   }
+//   return Number(input)
+// }
+
+// function ensureInteger(input, code, message) {
+//   if (!isInteger(input)) {
+//     tie(code, message)
+//   }
+//   return input
+// }
+
+// function ensureIsOneOf(input, valuesArr, code, message) {
+//   if (!valuesArr.filter(e => e === input).length) {
+//     tie(code, message)
+//   }
+//   return input
+// }
+
+// function ensureNotDuplicateKey(err, code, message) {
+//   if (err.message.indexOf('duplicate key') !== -1) {
+//     tie(code, message)
+//   }
+//   return err
+// }
+
+// function ensureNotEmpty(input, code, message) {
+//   if (isEmpty(input)) {
+//     tie(code, message)
+//   }
+//   return input
+// }
+
+// function ensureObject(input, code, message) {
+//   if (!isPlainObject(input)) {
+//     tie(code, message)
+//   }
+//   return input
+// }
+
+// function ensurePassword(input, code) {
+//   if (!isString(input)) {
+//     tie(code, 'Password is not a string')
+//   }
+//   return validatePassword(input, code)
+// }
+
+// function ensureRowCount(rs, count, code, message, params) {
+//   if (rs.rowCount !== count) {
+//     tie(code, message, params)
+//   }
+//   return rs
+// }
+
+// function ensureSelectCount(rs, count, code, message) {
+//   const rscount = parseInt(rs.rows[0].count)
+//   if (rscount !== count) {
+//     tie(code, message, rscount)
+//   }
+//   return rs
+// }
+
+// //
+// // Optional
+// //
+
+// function ensureOptionalInteger(input, code, message) {
+//   if (!isUndefined(input)) {
+//     return ensureInteger(input, code, message)
+//   }
+//   return input
+// }
+
+// function ensureOptionalObject(input, code, message) {
+//   if (!isUndefined(input)) {
+//     return ensureObject(input, code, message)
+//   }
+//   return input
+// }

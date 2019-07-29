@@ -1,5 +1,5 @@
 /**
- * Copyright Matthew Lohbihler 2019
+ * Copyright Serotonin Software 2019
  */
 const { generateDbPassword, sign, tie, verify } = require('../common')
 const { ensureEmail, ensureExists, ensurePassword, ensureString, ensureUrlWithToken } = require('../ensure')
@@ -113,10 +113,10 @@ module.exports.activateRegistration = (req, res) => {
       [email])
 
     if (rs.rowCount === 0) {
-      tie('user-activateRegistration-3', 'Pending verification not found')
+      tie('user-activateRegistration-4', 'Pending verification not found')
     }
 
-    respond(res)
+    respond(res, { email })
   })
 }
 

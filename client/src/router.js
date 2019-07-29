@@ -5,6 +5,8 @@ import Home from '@/views/Home'
 import Dashboard from '@/views/Dashboard'
 import Login from '@/views/Login'
 import Logout from '@/views/Logout'
+import Register from '@/views/Register'
+import RegisterVerify from '@/views/RegisterVerify'
 
 import store from './store'
 import { refreshUserData } from './util'
@@ -29,6 +31,8 @@ export default new Router({
     { path: '/dashboard', name: 'dashboard', component: Dashboard, beforeEnter: ensureAuthenticated },
     { path: '/login', name: 'login', component: Login, beforeEnter: forwardToDashboardIfAuthenticated },
     { path: '/logout', name: 'logout', component: Logout },
+    { path: '/register', name: 'register', component: Register },
+    { path: '/register-verify/:token', name: 'registerVerify', component: RegisterVerify },
     { path: '*', redirect: { name: 'home' } }
 
     // { path: '/about', name: 'about', component: About, beforeEnter: ensureUserDataLoaded },
@@ -36,8 +40,6 @@ export default new Router({
     // { path: '/change-email-verify/:token', name: 'changeEmailVerify', component: ChangeEmailVerify, beforeEnter: ensureAuthenticated },
     // { path: '/pay-with-mannabase', name: 'payWithMannabase', component: PayWithMannabase, beforeEnter: ensureUserDataLoaded },
     // { path: '/privacy-policy', name: 'privacyPolicy', component: PrivacyPolicy, beforeEnter: ensureUserDataLoaded },
-    // { path: '/register', name: 'register', component: Register },
-    // { path: '/register-verify/:token', name: 'registerVerify', component: RegisterVerify },
     // { path: '/reset-password', name: 'resetPassword', component: ResetPassword },
     // { path: '/reset-password-verify/:token', name: 'resetPasswordVerify', component: ResetPasswordVerify },
     // { path: '/send-coins-confirm/:token', name: 'sendCoinsConfirm', component: SendCoinsConfirm, beforeEnter: ensureAuthenticated },

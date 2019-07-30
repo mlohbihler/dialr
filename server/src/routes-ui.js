@@ -27,6 +27,6 @@ router.post('/user', user.register)
 router.post('/user/activate-registration', user.activateRegistration)
 router.post('/user/resend-verification-email', user.resendVerificationEmail)
 router.post('/user/request-password-reset', user.requestPasswordReset)
-router.post('/user/validate-password-reset-token', user.validatePasswordResetToken)
+router.post('/user/reset-password', user.resetPassword)
 
 module.exports = router

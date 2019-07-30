@@ -1,10 +1,15 @@
 <template>
   <div id="app">
     <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link> |
-      <router-link v-if="userData" to="/dashboard">Dashboard</router-link>
-      <router-link v-else to="/login">Login</router-link>
+      <template v-if="!userData">
+        <router-link :to="{ name: 'home' }">Home</router-link> |
+        <router-link :to="{ name: 'login' }">Login</router-link>
+      </template>
+      <template v-else>
+        <router-link :to="{ name: 'dashboard' }">Dashboard</router-link> |
+        <router-link :to="{ name: 'accessKeys' }">Access Keys</router-link> |
+        <router-link :to="{ name: 'logout' }">Logout ({{userData.email}})</router-link>
+      </template>
     </div>
     <router-view/>
     <footer>&copy; Serotonin Software 2019</footer>
@@ -181,7 +186,17 @@ button {
 }
 
 footer {
+  margin-top: 20px;
   font-size: smaller;
   color: $grey;
+}
+
+.success-message {
+  color: $brandBlue;
+}
+
+.narrow {
+  width: 400px;
+  margin: 0 auto;
 }
 </style>

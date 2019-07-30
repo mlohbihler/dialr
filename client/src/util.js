@@ -32,12 +32,32 @@ export async function refreshUserData() {
 }
 
 /**
+ * If called with only `text`, the code will attempt to pluralize it.
+ * If called with `text` and `mult`, `text` is assumed to be the singular
+ */
+export function plural(count, text, mult) {
+  if (count === 1) {
+    return mult ? text : `1 ${text}`
+  }
+  if (mult) {
+    return mult
+  }
+  if (text[text.length - 1] === 'y') {
+    return `${count} ${text.substring(0, text.length - 1)}ies`
+  }
+  if (text[text.length - 1] === 's') {
+    return `${count} ${text}es`
+  }
+  return `${count} ${text}s`
+}
+
+/**
  * This, too, is needed for unit tests.
  */
 export default {
   localUrl,
-  refreshUserData,
-  // staticUrl
+  plural,
+  refreshUserData
 }
 
 //
@@ -138,26 +158,6 @@ export default {
 //   // All definitions that remain are added to the columns with default settings
 //   defs.forEach(def => cols.push({ ...def }))
 //   return cols
-// }
-
-// /**
-//  * If called with only `text`, the code will attempt to pluralize it.
-//  * If called with `text` and `mult`, `text` is assumed to be the singular
-//  */
-// export function plur(count, text, mult) {
-//   if (count === 1) {
-//     return mult ? text : `1 ${text}`
-//   }
-//   if (mult) {
-//     return mult
-//   }
-//   if (text[text.length - 1] === 'y') {
-//     return `${count} ${text.substring(0, text.length - 1)}ies`
-//   }
-//   if (text[text.length - 1] === 's') {
-//     return `${count} ${text}es`
-//   }
-//   return `${count} ${text}s`
 // }
 
 // /**

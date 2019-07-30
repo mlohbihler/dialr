@@ -48,6 +48,7 @@ function ensureNumber(value, code, message) {
 }
 
 function ensurePassword(password, errorCode) {
+  ensureString(password, errorCode, 'Password is invalid')
   // Ensure the password is sufficiently secure.
   let msg = null
   const val = (password || '').trim()

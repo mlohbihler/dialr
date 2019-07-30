@@ -1,9 +1,9 @@
 <!-- Copyright Serotonin Software 2019 -->
 <template>
   <div>
-    This is the dashboard page
+    <Loading v-if="!loaded"/>
+    <p>This is the dashboard page. You have {{ experimentCountText }}. </p>
   </div>
-<!-- <div class="wrapper"> -->
   <!-- <header> -->
     <!-- <h1>Dashboard</h1> -->
   <!-- </header> -->
@@ -39,38 +39,21 @@
       <!-- </template> -->
     <!-- </DashboardWidget> -->
   <!-- </div> -->
-<!-- </div> -->
 </template>
 
 <script>
-// /* eslint-disable */
-// import iconArrow from '../../assets/svg/angle-right.svg'
-// import iconCalendar from '../../assets/svg/calendar.svg'
-// import iconLocation from '../../assets/svg/map-marker.svg'
-// import iconDevice from '../../assets/svg/icon-devices.svg'
-// import iconBays from '../../assets/svg/icon-bays.svg'
-// import iconServices from '../../assets/svg/icon-services.svg'
-// import iconGauge from '../../assets/svg/icon-gauge.svg'
-// import iconTimes from '../../assets/svg/icon-times.svg'
-// /* eslint-enable */
-// import BatterySohChart from './includes/BatterySohChart'
-// import DashboardWidget from '../ui/DashboardWidget'
-// import DateFormatter from './includes/DateFormatter'
-// import CheckBox from '../ui/CheckBox'
-// import SelectMenu from '../ui/SelectMenu'
-// import IconStatus from '../ui/IconStatus'
-// import ChartGraph from '../ui/ChartGraph'
+import Loading from '@/components/Loading'
 
-// import { post } from '@/api'
-// import { forOwn } from 'lodash'
-// import { columnsToIndexMap, nullSafeNoCaseStringCompare } from '@/util'
+import { get } from '@/api'
 // import { mapActions, mapGetters } from 'vuex'
+import { plural } from '@/util'
 
 export default {
-  // name: 'PageDashboard',
-  // components: { BatterySohChart, DashboardWidget, DateFormatter, CheckBox, SelectMenu, IconStatus, ChartGraph },
+  components: { Loading },
   data() {
     return {
+      loaded: false,
+      experiments: null
       // // Device widget data
       // loadingDevices: true,
       // rawDeviceData: [],
@@ -127,79 +110,77 @@ export default {
       // newsData: []
     }
   },
-  // beforeMount() {
-  //   this.locationsLength = this.getUISetting('dashboard.devices.length', this.locationsLength)
-  //   this.locationsSort = this.getUISetting('dashboard.devices.sort', this.locationsSort)
-  //   this.servicesLength = this.getUISetting('dashboard.services.length', this.servicesLength)
-  //   this.servicesRunning = this.getUISetting('dashboard.services.running', this.servicesRunning)
-  //   this.batteriesLength = this.getUISetting('dashboard.batteries.length', this.batteriesLength)
-  //   this.batteriesRunning = this.getUISetting('dashboard.batteries.running', this.batteriesRunning)
+  async beforeMount() {
+    const result = await get('/experiments')
+    console.log(result)
+    this.experiments = result.experiments
+    this.loaded = true
+  },
+  computed: {
+    // ...mapGetters(['getUISetting']),
+    experimentCount() {
+      return this.experiments ? this.experiments.length : 0
+    },
+    experimentCountText() {
+      return plural(this.experimentCount, 'experiment')
+    }
+    // deviceData() {
+    //   const data = [ ...this.rawDeviceData ]
 
-  //   // Populate the widgets
-  //   this.devicesRefresh()
-  //   this.servicesRefresh()
-  //   this.batteriesRefresh()
-  //   this.newsRefresh()
-  // },
-  // computed: {
-  //   ...mapGetters(['getUISetting']),
-  //   deviceData() {
-  //     const data = [ ...this.rawDeviceData ]
+    //   // Sort by locations sort order.
+    //   let sortfn = (a, b) => nullSafeNoCaseStringCompare(a.location, b.location)
+    //   if (this.locationsSort === 'mostDevices') {
+    //     sortfn = (a, b) => b.total - a.total
+    //   } else if (this.locationsSort === 'mostRecent') {
+    //     sortfn = (a, b) => b.latestInServiceDate - a.latestInServiceDate
+    //   }
+    //   data.sort(sortfn)
 
-  //     // Sort by locations sort order.
-  //     let sortfn = (a, b) => nullSafeNoCaseStringCompare(a.location, b.location)
-  //     if (this.locationsSort === 'mostDevices') {
-  //       sortfn = (a, b) => b.total - a.total
-  //     } else if (this.locationsSort === 'mostRecent') {
-  //       sortfn = (a, b) => b.latestInServiceDate - a.latestInServiceDate
-  //     }
-  //     data.sort(sortfn)
+    //   // Limit to the locations length.
+    //   if (data.length > this.locationsLength) {
+    //     data.length = this.locationsLength
+    //   }
 
-  //     // Limit to the locations length.
-  //     if (data.length > this.locationsLength) {
-  //       data.length = this.locationsLength
-  //     }
+    //   return data
+    // },
+    // serviceData() {
+    //   let data
 
-  //     return data
-  //   },
-  //   serviceData() {
-  //     let data
+    //   // Show only running services?
+    //   if (this.servicesRunning) {
+    //     data = this.rawServiceData.filter(e => e.status === 'servicing')
+    //   } else {
+    //     data = [ ...this.rawServiceData ]
+    //   }
 
-  //     // Show only running services?
-  //     if (this.servicesRunning) {
-  //       data = this.rawServiceData.filter(e => e.status === 'servicing')
-  //     } else {
-  //       data = [ ...this.rawServiceData ]
-  //     }
+    //   // Limit to the services length.
+    //   if (data.length > this.servicesLength) {
+    //     data.length = this.servicesLength
+    //   }
 
-  //     // Limit to the services length.
-  //     if (data.length > this.servicesLength) {
-  //       data.length = this.servicesLength
-  //     }
+    //   return data
+    // },
+    // batteryData() {
+    //   let data
 
-  //     return data
-  //   },
-  //   batteryData() {
-  //     let data
+    //   // Show only batteries currently beign serviced?
+    //   if (this.batteriesRunning) {
+    //     data = this.rawBatteryData.filter(e => e.status === 'servicing')
+    //   } else {
+    //     data = [ ...this.rawBatteryData ]
+    //   }
 
-  //     // Show only batteries currently beign serviced?
-  //     if (this.batteriesRunning) {
-  //       data = this.rawBatteryData.filter(e => e.status === 'servicing')
-  //     } else {
-  //       data = [ ...this.rawBatteryData ]
-  //     }
+    //   // Limit to the batteries length.
+    //   if (data.length > this.batteriesLength) {
+    //     data.length = this.batteriesLength
+    //   }
 
-  //     // Limit to the batteries length.
-  //     if (data.length > this.batteriesLength) {
-  //       data.length = this.batteriesLength
-  //     }
-
-  //     return data
-  //   },
-  //   hasNews() {
-  //     return this.newsData.filter(e => e.unread).length > 0
-  //   }
-  // },
+    //   return data
+    // },
+    // hasNews() {
+    //   return this.newsData.filter(e => e.unread).length > 0
+    // }
+  },
   // methods: {
   //   ...mapActions(['saveUISettings']),
 

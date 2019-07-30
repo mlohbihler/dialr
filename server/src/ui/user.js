@@ -161,16 +161,15 @@ module.exports.requestPasswordReset = (req, res) => {
   })
 }
 
-module.exports.validatePasswordResetToken = (req, res) => {
+module.exports.resetPassword = (req, res) => {
   apiPipeline(req, res, [], async () => {
-    const token = ensureExists(req.body.token, 'user-validatePasswordResetToken-1', 'Missing token')
-    const passwordInput = ensureString(req.body.password, 'user-validatePasswordResetToken-2', 'Password is invalid')
-    const password = ensurePassword(passwordInput, 'user-validatePasswordResetToken-3')
+    const token = ensureExists(req.body.token, 'user-resetPassword-1', 'Missing token')
+    const password = ensurePassword(req.body.password, 'user-resetPassword-2')
 
     const data = await consumeSingleUseToken(req.db, token)
 
     if (!data) {
-      tie('register-validatePasswordResetToken-4', 'token is invalid, already used, or has expired')
+      tie('register-resetPassword-3', 'token is invalid, already used, or has expired')
     }
 
     const email = data.content.email
@@ -178,7 +177,7 @@ module.exports.validatePasswordResetToken = (req, res) => {
 
     await req.db.query('UPDATE users SET password_hash = $1 WHERE email=$2', [dbhash, email])
 
-    respond(res)
+    respond(res, { email })
   })
 }
 

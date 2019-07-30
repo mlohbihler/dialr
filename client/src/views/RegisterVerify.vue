@@ -1,6 +1,6 @@
 <!-- Copyright Serotonin Software 2019 -->
 <template>
-  <div id="register-verify">
+  <div class="narrow">
     <div v-if="error" class="error-message">{{ error }}</div>
     <p v-else>
       One sec, I'm verifying your token thingy...
@@ -12,7 +12,6 @@
 import { post } from '@/api'
 
 export default {
-  name: 'RegisterVerify',
   data() {
     return {
       error: null
@@ -40,9 +39,7 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
-#register-verify {
-  .error-message {
-    margin-bottom: 20px;
-  }
+.error-message {
+  margin-bottom: 20px;
 }
 </style>

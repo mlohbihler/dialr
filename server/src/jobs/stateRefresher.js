@@ -71,7 +71,7 @@ async function load(opts) {
       if (row.user_active && row.access_key_active) {
         logger.info(`Adding access key ${row.access_key} to user ${row.user_id}`)
         accessKeys[row.access_key] = row.user_id
-      } else {
+      } else if (accessKeys[row.access_key]) {
         logger.info(`Removing access key ${row.access_key} from user ${row.user_id}`)
         // If this is slow, use >= node 10. Fast for me, and faster than maps too.
         delete accessKeys[row.access_key]

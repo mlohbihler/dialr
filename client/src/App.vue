@@ -50,7 +50,7 @@ export default {
   }
 }
 
-a {
+a, button.link {
   color: $inactiveLink;
   &.router-link-exact-active {
     color: $activeLink;
@@ -77,7 +77,7 @@ button {
     cursor: not-allowed;
     color: $brandBlue;
 
-    & .spinner {
+    .spinner {
       display: block;
       position: absolute;
       top: 50%;
@@ -87,7 +87,7 @@ button {
       text-align: center;
       line-height: 0;
 
-      & > div {
+      > div {
         width: 16px;
         height: 16px;
         background-color: $brandBlue;
@@ -98,12 +98,12 @@ button {
         animation: sk-bouncedelay 1.4s infinite ease-in-out both;
       }
 
-      & .bounce1 {
+      .bounce1 {
         -webkit-animation-delay: -0.32s;
         animation-delay: -0.32s;
       }
 
-      & .bounce2 {
+      .bounce2 {
         -webkit-animation-delay: -0.16s;
         animation-delay: -0.16s;
         background-color: $brandGreen;
@@ -125,6 +125,14 @@ button {
         }
       }
     }
+  }
+
+  &.link {
+    border: none;
+    background: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+
   }
 }
 

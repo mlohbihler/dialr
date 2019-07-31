@@ -2,7 +2,7 @@
 <template>
   <div>
     <Loading v-if="!loaded"/>
-    <p>This is the dashboard page. You have {{ experimentCountText }}. </p>
+    <p v-else>This is the dashboard page. You have {{ experimentCountText }}. </p>
   </div>
   <!-- <header> -->
     <!-- <h1>Dashboard</h1> -->

@@ -37,10 +37,10 @@ export async function refreshUserData() {
  */
 export function plural(count, text, mult) {
   if (count === 1) {
-    return mult ? text : `1 ${text}`
+    return `1 ${mult ? text : text}`
   }
   if (mult) {
-    return mult
+    return `${count} ${mult}`
   }
   if (text[text.length - 1] === 'y') {
     return `${count} ${text.substring(0, text.length - 1)}ies`
@@ -51,10 +51,28 @@ export function plural(count, text, mult) {
   return `${count} ${text}s`
 }
 
+export function copyToClipboard(str) {
+  // Create new element
+  var el = document.createElement('textarea')
+  // Set value (string to be copied)
+  el.value = str
+  // Set non-editable to avoid focus and move outside of view
+  el.setAttribute('readonly', '')
+  el.style = { position: 'absolute', left: '-9999px' }
+  document.body.appendChild(el)
+  // Select text inside element
+  el.select()
+  // Copy text to clipboard
+  document.execCommand('copy')
+  // Remove temporary element
+  document.body.removeChild(el)
+}
+
 /**
  * This, too, is needed for unit tests.
  */
 export default {
+  copyToClipboard,
   localUrl,
   plural,
   refreshUserData

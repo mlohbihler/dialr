@@ -6,9 +6,8 @@
       <p>You have {{ accessKeyCountText }}. </p>
       <ul>
         <ol v-for="(key , i) in accessKeys" :key="key">
-          <div class="key">{{ key }}</div>
+          <div class="key"><ClipboardCopy :str="key">{{ key }}</ClipboardCopy></div>
           <div class="actions">
-            <ClipboardCopy :str="key"><i class='fa fa-copy' title="copy to clipboard"></i></ClipboardCopy>
             <i class='fa fa-times' title="delete" @click="deleteKey(key, i)"></i>
           </div>
         </ol>
@@ -84,11 +83,12 @@ ul {
     div {
       &.key {
         padding: 0 5px;
-        width: 340px;
+        width: 360px;
       }
 
       &.actions {
-        visibility: hidden;
+        opacity: 0;
+        transition: all 0.5s;
 
         i {
           padding: 0 5px;
@@ -107,7 +107,7 @@ ul {
     &:hover {
       div {
         &.actions {
-          visibility: visible;
+          opacity: 1;
         }
       }
     }

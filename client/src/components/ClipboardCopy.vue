@@ -1,6 +1,6 @@
 <!-- Copyright Serotonin Software 2019 -->
 <template>
-  <span class="copy-container" @click="copy">
+  <span class="copy-container" @click="copy" title="click to copy to clipboard">
     <slot></slot>
     <span class="copied" :style="copiedStyles">Copied!</span>
   </span>
@@ -62,7 +62,8 @@ export default {
 
 <style lang="scss" scoped>
 .copy-container {
-  position: relative
+  position: relative;
+  cursor: pointer;
 }
 
 .copied {

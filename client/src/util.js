@@ -69,10 +69,18 @@ export function copyToClipboard(str) {
 }
 
 /**
+ * Convenience function to avoid lint warnings about undeclared vars.
+ */
+export function gapi() {
+  return window.gapi
+}
+
+/**
  * This, too, is needed for unit tests.
  */
 export default {
   copyToClipboard,
+  gapi,
   localUrl,
   plural,
   refreshUserData

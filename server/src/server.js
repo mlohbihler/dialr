@@ -1,7 +1,6 @@
 /**
  * Copyright Serotonin Software 2019
  */
-// Import
 const bodyParser = require('body-parser')
 const compression = require('compression')
 const express = require('express')

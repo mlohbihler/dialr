@@ -7,10 +7,15 @@
 
 <script>
 import { dele } from '@/api'
+import { gapi } from '@/util'
 
 export default {
   async mounted() {
-    await dele('/session')
+    const logoutPromise = dele('/session')
+    const signoutPromise = gapi().auth2.getAuthInstance().signOut()
+
+    await Promise.all([logoutPromise, signoutPromise])
+
     this.$store.commit('setUserData', null)
     this.$router.push({ name: 'login', params: { status: 'loggedOut' } })
   }

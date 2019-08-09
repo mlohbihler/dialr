@@ -21,6 +21,7 @@ router.delete('/experiments', experiments.remove)
 
 router.get('/session', session.getCurrentUser)
 router.post('/session', session.login)
+router.post('/session/gtoken', session.glogin)
 router.delete('/session', session.logout)
 
 router.post('/user', user.register)

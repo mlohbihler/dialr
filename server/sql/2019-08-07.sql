@@ -1,0 +1,2 @@
+ALTER TABLE users ADD google_id VARCHAR(25) UNIQUE;
+ALTER TABLE users ALTER password_hash DROP NOT NULL;

@@ -10,6 +10,15 @@
     <p v-else-if="loggedOut" class="success-message">
       <strong>You have been logged out.</strong>
     </p>
+
+    <p class="loginMessage">
+      Sign in with your Google account
+    </p>
+    <div id="google-signin-button" class="center"></div>
+
+    <p class="loginMessage">
+      Or, login with your DiaLR account
+    </p>
     <form @submit.prevent="trySubmit" novalidate>
       <FormText label="Email" required type="email" placeholder="Email" v-model="email" autoFocus/>
       <FormText label="Password" required type="password" placeholder="Password" v-model="password"/>
@@ -33,7 +42,7 @@ import FormButton from '../components/FormButton'
 import FormText from '../components/FormText'
 
 import { post } from '@/api'
-// import { localUrl } from '@/util'
+import { gapi } from '@/util'
 import { mapMutations } from 'vuex'
 
 export default {
@@ -63,6 +72,12 @@ export default {
       this.loggedOut = true
     }
   },
+  mounted() {
+    gapi().signin2.render('google-signin-button', {
+      onsuccess: this.onSignIn,
+      onfailure: this.onFailure
+    })
+  },
   methods: {
     ...mapMutations(['setUserData']),
     async trySubmit() {
@@ -73,6 +88,19 @@ export default {
         password: this.password
       })
 
+      this.finishLogin(result)
+    },
+    async onSignIn(guser) {
+      this.inProgress = true
+
+      // TODO the profile information is not needed here, so see if it can be not sent.
+      const result = await post('/session/gtoken', {
+        token: guser.getAuthResponse().id_token
+      })
+
+      this.finishLogin(result)
+    },
+    finishLogin(result) {
       this.inProgress = false
 
       this.error = null
@@ -87,8 +115,14 @@ export default {
         } else if (result.error.code === 'session-login-4') {
           this.error = 'Your email address has not yet been verified. Use the link belows to resend your verification email'
           this.showVerificationResendLink = true
-        } else if (result.error.code === 'session-login-5') {
+        } else if (result.error.code === 'session-login-5' || result.error.code === 'session-glogin-3') {
           this.error = 'Your account has been deactivated'
+        } else if (result.error.code === 'session-login-6') {
+          this.error = 'This user signs in with Google'
+        } else if (result.error.code === 'session-glogin-1') {
+          this.error = 'This auth token from Google is missing'
+        } else if (result.error.code === 'session-glogin-2') {
+          this.error = 'This auth token from Google is not value'
         } else {
           this.error = result.error.message
         }
@@ -97,6 +131,9 @@ export default {
         this.setUserData(result.user)
         this.$router.push({ name: 'dashboard' })
       }
+    },
+    onFailure() {
+      console.log('onFailure')
     }
   }
 }
@@ -110,5 +147,13 @@ export default {
 
 .links {
   margin-bottom: 20px;
+}
+
+.center {
+  display: inline-block;
+}
+
+.loginMessage {
+  font-weight: bold;
 }
 </style>

@@ -4,7 +4,7 @@
 const { ensureArray, ensureBoolean, ensureNumber, ensureString, ensureStringLength } = require('../ensure')
 const { apiPipeline, dbtx, user } = require('../pipeline')
 const { respond } = require('../responses')
-const { tie } = require('../common')
+const { nullOrUndefined, tie } = require('../common')
 const uuidv4 = require('uuid/v4')
 
 module.exports.create = (req, res) => {
@@ -30,52 +30,25 @@ module.exports.create = (req, res) => {
 
     await insertBranches(experimentId, body.branches, db)
 
-    sendUpsertResponse(res, uuid, body)
+    // Reselect the experiment and return
+    const experiments = await experimentQuery(db, user.user_id, experimentId)
+    respond(res, experiments[0])
   })
 }
 
 module.exports.list = (req, res) => {
   apiPipeline(req, res, [user()], async () => {
     const { db, user } = req
-
-    // Retrieve experiments from the database. Don't use the app state since
-    // that takes a moment to update.
-    const rs = await db.query(`
-      SELECT e.experiment_uuid, e.title, e.description, e.request_ttl, e.running,
-        b.branch, b.probability
-      FROM experiments e
-        LEFT JOIN branches b ON e.experiment_id = b.experiment_id
-      WHERE e.user_id = $1 AND e.active
-      ORDER BY e.experiment_uuid, b.sort
-      `, [user.user_id])
-
-    // Convert the table of results into experiment objects
-    const { rows } = rs
-    const experiments = []
-    let index = 0
-    while (index < rows.length) {
-      // Gather the experiment information from the first row.
-      const experiment = {
-        uuid: rows[index].experiment_uuid,
-        title: rows[index].title,
-        description: rows[index].description,
-        requestTtl: rows[index].request_ttl,
-        running: rows[index].running,
-        branches: []
-      }
-      experiments.push(experiment)
-
-      // Iterate over all the branches
-      while (index < rows.length && experiment.uuid === rows[index].experiment_uuid) {
-        experiment.branches.push({
-          value: rows[index].branch,
-          probability: rows[index].probability
-        })
-        index++
-      }
-    }
-
+    const experiments = await experimentQuery(db, user.user_id)
     respond(res, { experiments })
+  })
+}
+
+module.exports.get = (req, res) => {
+  apiPipeline(req, res, [user()], async () => {
+    const { db, user } = req
+    const experiments = await experimentQuery(db, user.user_id, null, req.params.uuid)
+    respond(res, experiments.length ? experiments[0] : null)
   })
 }
 
@@ -97,18 +70,19 @@ module.exports.update = (req, res) => {
 
     const experimentId = experimentRs.rows[0].experiment_id
 
-    // Delete all exising branches.
+    // Delete all exising branches and re-insert.
     await db.query('DELETE FROM branches WHERE experiment_id = $1', [experimentId])
-
     await insertBranches(experimentId, body.branches, db)
 
-    sendUpsertResponse(res, uuid, body)
+    // Reselect the experiment and return
+    const experiments = await experimentQuery(db, user.user_id, experimentId)
+    respond(res, experiments[0])
   })
 }
 
 module.exports.remove = (req, res) => {
   apiPipeline(req, res, [user()], async () => {
-    const uuid = ensureString(req.query.uuid, 'experiments-remove-1', 'uuid is missing or invalid')
+    const uuid = ensureString(req.params.uuid, 'experiments-remove-1', 'uuid is missing or invalid')
     const rs = await req.db.query(`
       UPDATE experiments SET active = false, modified = NOW()
       WHERE experiment_uuid = $1 AND active
@@ -165,24 +139,59 @@ async function insertBranches(experimentId, branches, db) {
     params.push(experimentId)
     params.push(branch.value)
     params.push(branch.probability)
-    params.push(index)
-    values.push(`($${index * 4 + 1},$${index * 4 + 2},$${index * 4 + 3},$${index * 4 + 4})`)
+    values.push(`($${index * 3 + 1},$${index * 3 + 2},$${index * 3 + 3})`)
   })
-  await db.query(`INSERT INTO branches (experiment_id, branch, probability, sort) VALUES ${values}`, params)
+  await db.query(`INSERT INTO branches (experiment_id, branch, probability) VALUES ${values}`, params)
 }
 
-function sendUpsertResponse(res, uuid, body) {
-  // Respond. Don't use a body spread here because we don't want to include any
-  // extra data that might have been put there.
-  respond(res, {
-    uuid,
-    title: body.title,
-    description: body.description,
-    requestTtl: body.requestTtl,
-    running: body.running,
-    branches: body.branches.map(branch => ({
-      value: branch.value,
-      probability: branch.probability
-    }))
-  })
+async function experimentQuery(db, userId, experimentId, uuid) {
+  // Retrieve experiments from the database. Don't use the app state since
+  // that takes a moment to update.
+  const params = [userId]
+  if (!nullOrUndefined(experimentId)) {
+    params.push(experimentId)
+  } else if (!nullOrUndefined(uuid)) {
+    params.push(uuid)
+  }
+  const rs = await db.query(`
+    SELECT e.experiment_uuid, e.title, e.description, e.request_ttl, e.running, e.hits,
+      b.branch, b.probability, b.last_used
+    FROM experiments e
+      LEFT JOIN branches b ON e.experiment_id = b.experiment_id
+    WHERE e.user_id = $1
+      AND e.active
+      ${nullOrUndefined(experimentId) ? '' : 'AND e.experiment_id = $2'}
+      ${nullOrUndefined(uuid) ? '' : 'AND e.experiment_uuid = $2'}
+    ORDER BY e.experiment_uuid, b.branch
+    `, params)
+
+  // Convert the table of results into experiment objects
+  const { rows } = rs
+  const experiments = []
+  let index = 0
+  while (index < rows.length) {
+    // Gather the experiment information from the first row.
+    const experiment = {
+      uuid: rows[index].experiment_uuid,
+      title: rows[index].title,
+      description: rows[index].description,
+      requestTtl: rows[index].request_ttl,
+      running: rows[index].running,
+      hits: rows[index].hits,
+      branches: []
+    }
+    experiments.push(experiment)
+
+    // Iterate over all the branches
+    while (index < rows.length && experiment.uuid === rows[index].experiment_uuid) {
+      experiment.branches.push({
+        value: rows[index].branch,
+        probability: rows[index].probability,
+        lastUsed: rows[index].last_used
+      })
+      index++
+    }
+  }
+
+  return experiments
 }

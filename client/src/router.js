@@ -3,7 +3,7 @@ import Router from 'vue-router'
 
 import Home from '@/views/Home'
 import AccessKeys from '@/views/AccessKeys'
-import Dashboard from '@/views/Dashboard'
+import Experiments from '@/views/Experiments'
 import Login from '@/views/Login'
 import Logout from '@/views/Logout'
 
@@ -38,9 +38,9 @@ export default new Router({
       beforeEnter: ensureAuthenticated
     },
     {
-      path: '/dashboard',
-      name: 'dashboard',
-      component: Dashboard,
+      path: '/experiments',
+      name: 'experiments',
+      component: Experiments,
       beforeEnter: ensureAuthenticated
     },
     {
@@ -52,7 +52,7 @@ export default new Router({
       path: '/login',
       name: 'login',
       component: Login,
-      beforeEnter: forwardToDashboardIfAuthenticated
+      beforeEnter: forwardToExperimentsIfAuthenticated
     },
     {
       path: '/logout',
@@ -83,19 +83,6 @@ export default new Router({
       path: '*',
       redirect: { name: 'home' }
     }
-
-    // { path: '/about', name: 'about', component: About, beforeEnter: ensureUserDataLoaded },
-    // { path: '/admin', name: 'admin', component: Admin, beforeEnter: ensureSuperuser },
-    // { path: '/change-email-verify/:token', name: 'changeEmailVerify', component: ChangeEmailVerify, beforeEnter: ensureAuthenticated },
-    // { path: '/pay-with-mannabase', name: 'payWithMannabase', component: PayWithMannabase, beforeEnter: ensureUserDataLoaded },
-    // { path: '/privacy-policy', name: 'privacyPolicy', component: PrivacyPolicy, beforeEnter: ensureUserDataLoaded },
-    // { path: '/send-coins-confirm/:token', name: 'sendCoinsConfirm', component: SendCoinsConfirm, beforeEnter: ensureAuthenticated },
-    // { path: '/settings', name: 'settings', component: Settings, beforeEnter: ensureAuthenticated },
-    // { path: '/share/:refId?', name: 'share', component: Share, beforeEnter: forwardToDashboardIfAuthenticated },
-    // { path: '/support', name: 'support', component: Support, beforeEnter: ensureUserDataLoaded },
-    // { path: '/technology', name: 'technology', component: Technology, beforeEnter: ensureUserDataLoaded },
-    // { path: '/terms-of-service', name: 'termsOfService', component: TermsOfService, beforeEnter: ensureUserDataLoaded },
-    // { path: '/ubi-signup', name: 'ubiSignup', component: UbiSignup, beforeEnter: ensureAuthenticated },
   ]
 })
 
@@ -108,7 +95,7 @@ function ensureUserDataLoaded(to, from, next) {
 //     if (!userData) {
 //       next({ name: 'logout' })
 //     } else if (!userData.superuser) {
-//       next({ name: 'dashboard' })
+//       next({ name: 'experiments' })
 //     } else {
 //       next()
 //     }
@@ -133,10 +120,10 @@ function ensureAuthenticated(to, from, next) {
   })
 }
 
-function forwardToDashboardIfAuthenticated(to, from, next) {
+function forwardToExperimentsIfAuthenticated(to, from, next) {
   loadUserData(userData => {
     if (userData) {
-      next({ name: 'dashboard' })
+      next({ name: 'experiments' })
     } else {
       next()
     }

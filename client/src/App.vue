@@ -6,7 +6,7 @@
         <router-link :to="{ name: 'login' }">Login</router-link>
       </template>
       <template v-else>
-        <router-link :to="{ name: 'dashboard' }">Dashboard</router-link> |
+        <router-link :to="{ name: 'experiments' }">Experiments</router-link> |
         <router-link :to="{ name: 'accessKeys' }">Access Keys</router-link> |
         <router-link :to="{ name: 'logout' }">Logout ({{userData.email}})</router-link>
       </template>
@@ -33,8 +33,11 @@ export default {
 </script>
 
 <style lang="scss">
-#app {
+* {
   font-family: 'Nunito', Helvetica, Arial, sans-serif;
+}
+
+#app {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
@@ -159,13 +162,29 @@ button {
     display: block;
     box-sizing: border-box;
     width: 100%;
-    border-radius: 20px;
+    border-radius: 3px;
     border: 1px solid $grey;
     font-weight: 400;
     font-size: 15px;
     padding: 0 10px;
     transition: all 0.3s;
     height: 40px;
+  }
+
+  input[type=checkbox] {
+    height: 20px;
+    display: inline-block;
+    width: 20px;
+    vertical-align: middle;
+  }
+
+  textarea {
+    padding: 10px;
+  }
+
+  .checkbox-text {
+    font-size: 16px;
+    vertical-align: middle;
   }
 
   button {
@@ -206,5 +225,49 @@ footer {
 .narrow {
   width: 400px;
   margin: 0 auto;
+}
+
+table.wide {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 1px;
+
+  thead {
+    th {
+      // background-color: lighten($brandBlue, 20%);
+      background-color: $brandBlue;
+      color: white;
+      padding: 4px;
+      &:last-child {
+        border-right: 0px;
+      }
+    }
+  }
+
+  tbody {
+    tr {
+      background-color: #F0F0F0;
+
+      &:nth-child(even) {
+        background-color: #E0E0E0;
+      }
+
+      td {
+        padding: 5px;
+        text-align: left;
+        font-size: smaller;
+
+        &.center {
+          text-align: center;
+        }
+      }
+    }
+  }
+}
+
+i {
+  padding: 0 5px;
+  cursor: pointer;
+  transition: all 0.5s;
 }
 </style>

@@ -118,10 +118,15 @@ function writeUserRsToObject(user) {
   }
 }
 
+function nullOrUndefined(value) {
+  return value === null || value === undefined
+}
+
 module.exports = {
   generateDbPassword,
   getCookie,
   inputErrorMessage,
+  nullOrUndefined,
   sessionTokenName,
   sign,
   testPasswordsAreEqual,

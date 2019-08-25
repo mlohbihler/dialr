@@ -12,12 +12,13 @@ const router = express.Router()
 
 router.post('/access-keys', accessKeys.create)
 router.get('/access-keys', accessKeys.list)
-router.delete('/access-keys', accessKeys.remove)
+router.delete('/access-keys/:key', accessKeys.remove)
 
 router.post('/experiments', experiments.create)
 router.get('/experiments', experiments.list)
+router.get('/experiments/:uuid', experiments.get)
 router.put('/experiments', experiments.update)
-router.delete('/experiments', experiments.remove)
+router.delete('/experiments/:uuid', experiments.remove)
 
 router.get('/session', session.getCurrentUser)
 router.post('/session', session.login)

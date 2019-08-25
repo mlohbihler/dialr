@@ -75,6 +75,26 @@ export function gapi() {
   return window.gapi
 }
 
+export function since(date, now = Date.now()) {
+  let diff = now - date.getTime()
+  if (diff < 10000) {
+    return 'Less than 10 seconds'
+  }
+  if (diff < 60000) {
+    return 'Less than 1 minute'
+  }
+  diff /= 60000
+  if (diff < 60) {
+    return plural(Math.round(diff), 'minute')
+  }
+  diff /= 60
+  if (diff < 24) {
+    return plural(Math.round(diff), 'hour')
+  }
+  diff /= 24
+  return plural(Math.round(diff), 'day', 'days')
+}
+
 /**
  * This, too, is needed for unit tests.
  */
@@ -83,7 +103,8 @@ export default {
   gapi,
   localUrl,
   plural,
-  refreshUserData
+  refreshUserData,
+  since
 }
 
 //

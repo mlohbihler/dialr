@@ -1,33 +1,45 @@
 <!-- Copyright Serotonin Software 2019 -->
 <template>
-  <div class="narrow">
+  <div>
     <Loading v-if="!loaded"/>
-    <template v-else>
-      <p>You have {{ accessKeyCountText }}. </p>
-      <ul>
-        <ol v-for="(key , i) in accessKeys" :key="key">
-          <div class="key"><ClipboardCopy :str="key">{{ key }}</ClipboardCopy></div>
-          <div class="actions">
-            <i class='fa fa-times' title="delete" @click="deleteKey(key, i)"></i>
-          </div>
-        </ol>
-      </ul>
+    <div v-else class="accessKey-list">
+      <p>
+        Access keys are used by your client code to request a branch. You should cycle your keys regularly.
+        You have {{ accessKeyCountText }}.
+      </p>
+      <table class="wide">
+        <thead>
+          <tr>
+            <th>Access key</th>
+            <th>Created</th>
+            <th>Last used</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(key, i) in accessKeys" :key="key.accessKey">
+            <td><ClipboardCopy :str="key.accessKey">{{ key.accessKey }}</ClipboardCopy></td>
+            <td>{{ since(key.created) }} ago</td>
+            <td>{{ key.lastUsed ? `${since(key.lastUsed)} ago` : '(never)' }}</td>
+            <td class="center"><i class='fa fa-trash' title="delete" @click="deleteKey(key, i)"></i></td>
+          </tr>
+          <tr><td colspan="4" class="center"><i class="fa fa-plus" @click="tryAdd" title="add another access key"></i></td></tr>
+        </tbody>
+      </table>
       <div v-if="error" class="error-message">{{ error }}</div>
-      <FormButton class="link" @click="tryAdd" :loading="loading">Create new access key</FormButton>
-    </template>
+    </div>
   </div>
 </template>
 
 <script>
 import ClipboardCopy from '@/components/ClipboardCopy'
-import FormButton from '@/components/FormButton'
 import Loading from '@/components/Loading'
 
 import { dele, get, post } from '@/api'
-import { plural } from '@/util'
+import { plural, since } from '@/util'
 
 export default {
-  components: { ClipboardCopy, FormButton, Loading },
+  components: { ClipboardCopy, Loading },
   data() {
     return {
       loaded: false,
@@ -58,12 +70,15 @@ export default {
       if (result.error) {
         this.error = result.error.message
       } else {
-        this.accessKeys.push(result.accessKey)
+        this.accessKeys.push(result)
       }
     },
     async deleteKey(key, index) {
-      dele(`/access-keys?key=${key}`)
+      dele(`/access-keys/${key.accessKey}`)
       this.accessKeys.splice(index, 1)
+    },
+    since(date) {
+      return since(new Date(date))
     }
   }
 }
@@ -71,46 +86,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
-ul {
-  padding: 0;
-
-  ol {
-    text-align: left;
-    padding: 3px 0;
-    background-color: #F0F0F0;
-    display: flex;
-
-    div {
-      &.key {
-        padding: 0 5px;
-        width: 360px;
-      }
-
-      &.actions {
-        opacity: 0;
-        transition: all 0.5s;
-
-        i {
-          padding: 0 5px;
-          cursor: pointer;
-
-          &.fa-copy { color: $brandBlue; }
-          &.fa-times { color: $brandRed; }
-        }
-      }
-    }
-
-    &:nth-child(even) {
-      background-color: #E0E0E0;
-    }
-
-    &:hover {
-      div {
-        &.actions {
-          opacity: 1;
-        }
-      }
-    }
-  }
-}
+.fa-trash:hover { color: $brandRed; }
+.fa-plus:hover { color: $brandGreen; }
 </style>

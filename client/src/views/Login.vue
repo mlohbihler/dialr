@@ -129,7 +129,7 @@ export default {
       } else {
         // Update the user data with the response.
         this.setUserData(result.user)
-        this.$router.push({ name: 'dashboard' })
+        this.$router.push({ name: 'experiments' })
       }
     },
     onFailure() {

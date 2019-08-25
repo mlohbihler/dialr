@@ -18,10 +18,14 @@ module.exports.create = (req, res) => {
 
     // Otherwise, create a new key
     const key = randToken.generate(32)
-    await db.query('INSERT INTO access_keys (access_key, user_id) VALUES ($1, $2)', [key, user.user_id])
+    const insertRs = await db.query('INSERT INTO access_keys (access_key, user_id) VALUES ($1, $2) RETURNING created', [key, user.user_id])
 
     // Respond
-    respond(res, { accessKey: key })
+    respond(res, {
+      accessKey: key,
+      created: insertRs.rows[0].created,
+      lastUsed: null
+    })
   })
 }
 
@@ -29,14 +33,18 @@ module.exports.list = (req, res) => {
   apiPipeline(req, res, [user()], async () => {
     // Retrieve the access keys from the database. Don't use the app state since
     // that takes a moment to update.
-    const rs = await req.db.query('SELECT access_key FROM access_keys WHERE user_id = $1 AND active', [req.user.user_id])
-    respond(res, { accessKeys: rs.rows.map(row => row.access_key) })
+    const rs = await req.db.query('SELECT access_key, created, last_used FROM access_keys WHERE user_id = $1 AND active', [req.user.user_id])
+    respond(res, { accessKeys: rs.rows.map(row => ({
+      accessKey: row.access_key,
+      created: row.created,
+      lastUsed: row.last_used
+    }))})
   })
 }
 
 module.exports.remove = (req, res) => {
   apiPipeline(req, res, [user()], async () => {
-    const key = ensureString(req.query.key, 'accessKeys-remove-1', 'key is missing or invalid')
+    const key = ensureString(req.params.key, 'accessKeys-remove-1', 'key is missing or invalid')
     const rs = await req.db.query(`
       UPDATE access_keys SET active = false, modified = NOW()
       WHERE access_key = $1 AND active

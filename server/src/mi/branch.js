@@ -94,10 +94,19 @@ module.exports.get = async (req, res) => {
 
   respond(res, { branch: request.branch, expiry: request.expiry })
 
-  // Record the hit and do any other post write stuff
-  db.query('UPDATE experiments SET hits = hits + 1 WHERE experiment_id = $1', [request.experimentId])
-    .catch(err => {
-      logger.error('Error updating hit count', err)
-    })
+  // Record the hit and do any other post write stuff. This is all done in parallel
+  logError(logger,
+    db.query('UPDATE experiments SET hits = hits + 1 WHERE experiment_id = $1', [request.experimentId]),
+    'Error updating experiment hit count')
+  logError(logger,
+    db.query('UPDATE access_keys SET last_used=NOW() WHERE access_key = $1', [accessKey]),
+    'Error updating access key last used')
+  logError(logger,
+    db.query('UPDATE branches SET last_used=NOW() WHERE experiment_id = $1 AND branch = $2', [request.experimentId, request.branch]),
+    'Error updating branch last used')
   // - telemetry send with uuid, rid, branch, outcome, runtime
+}
+
+function logError(logger, promise, msg) {
+  promise.catch(err => logger.error(msg, err))
 }

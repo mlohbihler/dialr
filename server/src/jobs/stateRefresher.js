@@ -53,7 +53,7 @@ async function load(opts) {
         LEFT JOIN branches b ON e.experiment_id = b.experiment_id
       WHERE (u.modified > $1 AND u.modified <= $2)
         OR (e.modified > $1 AND e.modified <= $2)
-      ORDER BY e.experiment_uuid, b.sort
+      ORDER BY e.experiment_uuid, b.branch
       `, [min, max])
 
     // While that's going on, let's dump expired request data.

@@ -24,7 +24,7 @@
  * - `outcome`: this parameter is optional. It can be used to track the outcome
  *              of a particular request (error messages, return values, etc).
  */
-const { tie } = require('../common')
+const { hashCode, tie } = require('../common')
 const { ensureExists } = require('../ensure')
 const { now, random } = require('../indeterminant')
 const { respond } = require('../responses')
@@ -57,14 +57,22 @@ module.exports.get = async (req, res) => {
     if (!branches || !branches.length) {
       tie('branch-6', 'Misconfigured experiment: no branches')
     }
-    const rand = Math.floor(random() * experiment.probabilitySum) + 1
+    let probabilitySum = 0
+    const filteredBranches = branches.filter(branch => {
+      if (branch.filter(req.query)) {
+        probabilitySum += branch.probability
+        return true
+      }
+      return false
+    })
+    const rand = Math.floor(random() * probabilitySum) + 1
     // TODO could also use a hash of the requestId as the rand, which would make
     // the branch more deterministic for the client code.
     let branch
     let sum = 0
     let index = 0
-    while (rand > sum && index < branches.length) {
-      branch = branches[index++]
+    while (rand > sum && index < filteredBranches.length) {
+      branch = filteredBranches[index++]
       sum += branch.probability
     }
 
@@ -97,16 +105,22 @@ module.exports.get = async (req, res) => {
   // Record the hit and do any other post write stuff. This is all done in parallel
   logError(logger,
     db.query('UPDATE experiments SET hits = hits + 1 WHERE experiment_id = $1', [request.experimentId]),
-    'Error updating experiment hit count')
+    'experiment hit count')
   logError(logger,
     db.query('UPDATE access_keys SET last_used=NOW() WHERE access_key = $1', [accessKey]),
-    'Error updating access key last used')
+    'access key last used')
   logError(logger,
     db.query('UPDATE branches SET last_used=NOW() WHERE experiment_id = $1 AND branch = $2', [request.experimentId, request.branch]),
-    'Error updating branch last used')
+    'branch last used')
   // - telemetry send with uuid, rid, branch, outcome, runtime
 }
 
 function logError(logger, promise, msg) {
-  promise.catch(err => logger.error(msg, err))
+  promise
+    .then(rs => {
+      if (rs.rowCount !== 1) {
+        logger.error(`${rs.rowCount} '${msg}' rows were updated`)
+      }
+    })
+    .catch(err => logger.error('Error updating ' + msg, err))
 }

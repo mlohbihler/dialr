@@ -53,42 +53,50 @@ function user(require, requireSuperuser) {
     const { req } = data
     const { db, headers } = req
 
-    // The session token can be found either as the session token cookie, or as the bearer in the authorization header.
-    let token = null
-    if (headers && headers.authorization && headers.authorization.indexOf('Bearer ') === 0) {
-      token = headers.authorization.substring(7)
+    // The session token can be found either as the session token cookie, or as the bearer in the authorization
+    // header. When run in dev, the user id can also be provided in the x-user-id header
+    let userId
+    if (process.env.NODE_ENV === 'development' && headers['x-user-id']) {
+      userId = headers['x-user-id']
     } else {
-      token = getCookie(req, sessionTokenName)
-      if (token) {
-        token = decodeURIComponent(token)
+      let token = null
+      if (headers && headers.authorization && headers.authorization.indexOf('Bearer ') === 0) {
+        token = headers.authorization.substring(7)
+      } else {
+        token = getCookie(req, sessionTokenName)
+        if (token) {
+          token = decodeURIComponent(token)
+        }
       }
-    }
 
-    if (!token) {
-      if (require) {
-        tie('not-authenticated', 'No session token')
+      if (!token) {
+        if (require) {
+          tie('not-authenticated', 'No session token')
+        }
+        return next()
       }
-      return next()
-    }
 
-    // Validate the token
-    const tokenData = verify(token)
-    if (!tokenData) {
-      if (require) {
-        tie('not-authenticated', 'Invalid token')
+      // Validate the token
+      const tokenData = verify(token)
+      if (!tokenData) {
+        if (require) {
+          tie('not-authenticated', 'Invalid token')
+        }
+        return next()
       }
-      return next()
-    }
 
-    if (tokenData.expiry < new Date().getTime()) {
-      if (require) {
-        tie('not-authenticated', 'Token is expired')
+      if (tokenData.expiry < new Date().getTime()) {
+        if (require) {
+          tie('not-authenticated', 'Token is expired')
+        }
+        return next()
       }
-      return next()
+
+      userId = tokenData.userId
     }
 
     // Try to find the user
-    const rs = await db.query(`${userQuery} WHERE u.user_id = $1`, [tokenData.userId])
+    const rs = await db.query(`${userQuery} WHERE u.user_id = $1`, [userId])
 
     if (!rs.rows.length) {
       if (require) {

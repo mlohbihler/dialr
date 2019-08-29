@@ -27,11 +27,11 @@
                 <template v-if="isEditingExperiment(expIndex)">
                   <i class="fa fa-save" @click="saveExperimentEdit" title="save"></i>
                   <i class="fa fa-times" @click="cancelExperimentEdit" title="cancel"></i>
+                  <i class="fa fa-trash" v-if="exp.uuid" @click="deleteExperiment" title="delete"></i>
                 </template>
                 <template v-else>
                   <i class="fa fa-sync" @click="refreshExperiment(expIndex)" title="refresh"></i>
                   <i class="fa fa-edit" @click="editExperiment(expIndex)" title="edit"></i>
-                  <i class="fa fa-trash" @click="deleteExperiment(expIndex)" title="delete"></i>
                 </template>
               </td>
             </tr>
@@ -45,7 +45,7 @@
                   <FormCheck label="Running" required placeholder="Is this experiment currently running" v-model="editExperimentRunning"/>
                   <FormText label="Request TTL" required type="text" v-model="editExperimentTtl" :errorMsg="editExperimentTtlError"
                       hint="The max amount of time that requests are expected to last"/>
-                  <FormTextArea label="Description" type="text" rows="5" placeholder="Long description of the experiment"
+                  <FormTextArea label="Description" :rows="5" placeholder="Long description of the experiment" classes="description-text"
                       v-model="editExperimentDescription" :errorMsg="editExperimentDescriptionError"/>
                 </div>
                 <template v-else>
@@ -57,6 +57,7 @@
                       <thead>
                         <th>Branch</th>
                         <th>Probability</th>
+                        <th>Filter</th>
                         <th>Last used</th>
                         <th></th>
                       </thead>
@@ -72,21 +73,24 @@
                                 <i class="fa fa-angle-down" @click="decrementProbability" title="decrement"></i>
                               </div>
                             </td>
+                            <td><input type="text" class="filter-input" v-model="editBranchFilter" size="30"/></td>
                             <td>{{ branch.lastUsed ? `${since(branch.lastUsed)} ago` : '(never)' }}</td>
                             <td>
                               <i class="fa fa-save" @click="saveBranchEdit" title="save"></i>
                               <i class="fa fa-times" @click="cancelBranchEdit" title="cancel"></i>
+                              <i class="fa fa-trash" @click="deleteBranch" title="delete"></i>
                             </td>
                           </template>
                           <template v-else>
                             <!-- View the branch -->
                             <td>{{ branch.value }}</td>
-                            <td>{{ branch.probability }} ({{ branch.percent }}%)</td>
+                            <td>{{ branch.probability }}</td>
+                            <td>{{ branch.filter }}</td>
                             <td>{{ branch.lastUsed ? `${since(branch.lastUsed)} ago` : '(never)' }}</td>
                             <td><i class="fa fa-edit" @click="editBranch(expIndex, branchIndex)" title="edit"></i></td>
                           </template>
                         </tr>
-                        <tr><td colspan="4"><i class="fa fa-plus" @click="addBranch(expIndex)" title="add another branch"></i></td></tr>
+                        <tr><td colspan="5"><i class="fa fa-plus" @click="addBranch(expIndex)" title="add another branch"></i></td></tr>
                       </tbody>
                     </table>
                   </div>
@@ -137,6 +141,7 @@ export default {
       editingBranch: null,
       editBranchValue: '',
       editBranchProbability: 0,
+      editBranchFilter: '',
       editBranchError: null
     }
   },
@@ -146,7 +151,6 @@ export default {
     result.experiments.forEach(e => {
       // Add an expanded attribute to each row
       e.expanded = false
-      this.computeBranchPercents(e)
       this.experiments.push(e)
     })
 
@@ -162,14 +166,6 @@ export default {
     }
   },
   methods: {
-    //   ...mapActions(['saveUISettings']),
-    computeBranchPercents(exp) {
-      // Calculate the sum of all the branches.
-      const sum = exp.branches.reduce((agg, cur) => agg + cur.probability, 0)
-
-      // Then assign a percentage to each branch.
-      exp.branches.forEach(b => { b.percent = Math.round(b.probability * 100 / sum) })
-    },
     getToggleClasses(exp) {
       return ['fa', `fa-chevron-${exp.expanded ? 'up' : 'down'}`]
     },
@@ -212,10 +208,11 @@ export default {
       this.editExperimentTtl = '' + exp.requestTtl
       this.editExperimentDescription = exp.description
     },
-    deleteExperiment(expIndex) {
+    deleteExperiment() {
       if (confirm('Do you really want to delete this experiment?')) {
-        dele(`/experiments/${this.experiments[expIndex].uuid}`)
-        this.experiments.splice(expIndex, 1)
+        dele(`/experiments/${this.experiments[this.editingExperiment].uuid}`)
+        this.experiments.splice(this.editingExperiment, 1)
+        this.editingExperiment = null
       }
     },
     async refreshExperiment(expIndex) {
@@ -226,7 +223,6 @@ export default {
     },
     updateExperimentData(exp, expIndex) {
       exp.expanded = this.experiments[expIndex].expanded
-      this.computeBranchPercents(exp)
       this.experiments.splice(expIndex, 1, exp)
     },
     isEditingExperiment(expIndex) {
@@ -276,7 +272,6 @@ export default {
         }
       } else {
         result.expanded = exp.expanded
-        this.computeBranchPercents(result)
         this.experiments.splice(this.editingExperiment, 1, result)
         this.editingExperiment = null
       }
@@ -297,6 +292,14 @@ export default {
       const branch = this.experiments[expIndex].branches[branchIndex]
       this.editBranchValue = branch.value
       this.editBranchProbability = branch.probability
+      this.editBranchFilter = branch.filter
+    },
+    async deleteBranch() {
+      if (confirm('Do you really want to delete this branch?')) {
+        const exp = cloneDeep(this.experiments[this.editingBranch.expIndex])
+        exp.branches.splice(this.editingBranch.branchIndex, 1)
+        await this.saveBranch(exp)
+      }
     },
     isEditingBranch(expIndex, branchIndex) {
       if (branchIndex === undefined) {
@@ -330,13 +333,16 @@ export default {
       }
     },
     async saveBranchEdit() {
-      this.loaded = false
-      this.editBranchError = null
-
       const exp = cloneDeep(this.experiments[this.editingBranch.expIndex])
       const branch = exp.branches[this.editingBranch.branchIndex]
       branch.value = this.editBranchValue.trim()
       branch.probability = this.editBranchProbability
+      branch.filter = (this.editBranchFilter && this.editBranchFilter.trim()) || ''
+      await this.saveBranch(exp, this.editingBranch.expIndex)
+    },
+    async saveBranch(exp) {
+      this.loaded = false
+      this.editBranchError = null
 
       const result = await put('/experiments', exp)
 
@@ -355,7 +361,6 @@ export default {
         }
       } else {
         result.expanded = exp.expanded
-        this.computeBranchPercents(result)
         this.experiments.splice(this.editingBranch.expIndex, 1, result)
         this.editingBranch = null
       }
@@ -431,6 +436,7 @@ export default {
     thead {
       th {
         border: none;
+        text-align: center;
       }
     }
 
@@ -481,6 +487,11 @@ export default {
 
 .probability-input {
   text-align: right;
+  padding-right: 3px;
+}
+
+.filter-input {
+  padding-left: 3px;
   padding-right: 3px;
 }
 

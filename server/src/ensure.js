@@ -1,8 +1,8 @@
 /**
  * Copyright Serotonin Software 2019
  */
-const { tie } = require('./common')
-const { isArray, isBoolean, isNumber, isString } = require('lodash')
+const { nullOrUndefined, tie } = require('./common')
+const { isArray, isBoolean, isInteger, isNumber, isString } = require('lodash')
 const validator = require('validator')
 
 function ensureArray(value, code, message) {
@@ -28,6 +28,13 @@ function ensureEmail(value, code, message) {
 
 function ensureExists(value, code, message) {
   if (!value) {
+    tie(code, message)
+  }
+  return value
+}
+
+function ensureInteger(value, code, message) {
+  if (!isInteger(value)) {
     tie(code, message)
   }
   return value
@@ -88,13 +95,26 @@ function ensureUrlWithToken(input, code) {
   return input
 }
 
+//
+// Optional
+//
+
+function ensureOptionalString(input, code, message) {
+  if (!nullOrUndefined(input)) {
+    return ensureString(input, code, message)
+  }
+  return input
+}
+
 module.exports = {
   ensureArray,
   ensureBoolean,
   ensureEmail,
   ensureExists,
+  ensureInteger,
   ensureNonEmptyString,
   ensureNumber,
+  ensureOptionalString,
   ensurePassword,
   ensureString,
   ensureStringLength,

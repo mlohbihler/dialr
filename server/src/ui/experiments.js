@@ -1,7 +1,8 @@
 /**
  * Copyright Serotonin Software 2019
  */
-const { ensureArray, ensureBoolean, ensureNumber, ensureString, ensureStringLength } = require('../ensure')
+const { compileExpression } = require('filtrex')
+const { ensureArray, ensureBoolean, ensureInteger, ensureOptionalString, ensureString, ensureStringLength } = require('../ensure')
 const { apiPipeline, dbtx, user } = require('../pipeline')
 const { respond } = require('../responses')
 const { nullOrUndefined, tie } = require('../common')
@@ -28,7 +29,7 @@ module.exports.create = (req, res) => {
 
     const experimentId = experimentRs.rows[0].experiment_id
 
-    await insertBranches(experimentId, body.branches, db)
+    await updateBranches(experimentId, body.branches, db)
 
     // Reselect the experiment and return
     const experiments = await experimentQuery(db, user.user_id, experimentId)
@@ -70,9 +71,7 @@ module.exports.update = (req, res) => {
 
     const experimentId = experimentRs.rows[0].experiment_id
 
-    // Delete all exising branches and re-insert.
-    await db.query('DELETE FROM branches WHERE experiment_id = $1', [experimentId])
-    await insertBranches(experimentId, body.branches, db)
+    await updateBranches(experimentId, body.branches, db)
 
     // Reselect the experiment and return
     const experiments = await experimentQuery(db, user.user_id, experimentId)
@@ -98,7 +97,7 @@ function validateExperimentInput(user, body) {
   // Validate the given object.
   const title = ensureString(body.title, 'experiments-upsert-1', `Missing or invalid 'title'`)
   const description = ensureString(body.description, 'experiments-upsert-2', `Missing or invalid 'description'`)
-  const requestTtl = ensureNumber(body.requestTtl, 'experiments-upsert-3', `Missing or invalid 'requestTtl'`)
+  const requestTtl = ensureInteger(body.requestTtl, 'experiments-upsert-3', `Missing or invalid 'requestTtl'`)
   ensureBoolean(body.running, 'experiments-upsert-4', `Missing or invalid 'running'`)
 
   ensureStringLength(title, 1, 32, 'experiments-upsert-5', `'title' must be 1-32 characters`)
@@ -108,40 +107,64 @@ function validateExperimentInput(user, body) {
   }
 
   const branches = ensureArray(body.branches, 'experiments-upsert-8', `Missing or invalid 'branches'`)
-  if (branches.length < 2 || branches.length > user.max_branches) {
-    tie('experiments-upsert-9', `An experiment must have at least 2 branches, and not more than your maximum of ${user.max_branches}`)
+  if (branches.length < 1 || branches.length > user.max_branches) {
+    tie('experiments-upsert-9', `An experiment must have at least 1 branch, and not more than your maximum of ${user.max_branches}`)
   }
   const valueSet = new Set()
   let probabilitySum = 0
   branches.forEach(branch => {
     ensureString(branch.value, 'experiments-upsert-10', `Missing or invalid 'branch.value'`)
     ensureStringLength(branch.value, 1, 10, 'experiments-upsert-11', `'branch.value' must be 1-10 characters`)
-    ensureNumber(branch.probability, 'experiments-upsert-12', `Missing or invalid 'branch.probability'`)
+    ensureInteger(branch.probability, 'experiments-upsert-12', `Missing or invalid 'branch.probability'`)
+    ensureOptionalString(branch.filter, 'experiments-upsert-16', `Invalid 'branch.filter'`)
+
     if (branch.probability < 0) {
       tie('experiments-upsert-13', `'branch.probability' must be >= 0`)
     }
     valueSet.add(branch.value)
-    probabilitySum += branch.probability
+
+    if (branch.filter && branch.filter.trim()) {
+      try {
+        compileExpression(branch.filter)
+      } catch (err) {
+        tie('experiments-upsert-17', err.message)
+      }
+    } else {
+      probabilitySum += branch.probability
+    }
   })
   if (valueSet.size !== branches.length) {
     tie('experiments-upsert-14', `All branch values must be unique`)
   }
   if (probabilitySum < 1) {
-    tie('experiments-upsert-15', `Probability sum must be > 0`)
+    tie('experiments-upsert-15', `Unfiltered probability sum must be > 0`)
   }
 }
 
-async function insertBranches(experimentId, branches, db) {
-  // Insert the branches
-  const params = []
-  const values = []
+async function updateBranches(experimentId, branches, db) {
+  // Upsert the branches
+  const upsertParams = []
+  const upsertValues = []
+  const deleteParams = [experimentId]
+  const deleteValues = []
   branches.forEach((branch, index) => {
-    params.push(experimentId)
-    params.push(branch.value)
-    params.push(branch.probability)
-    values.push(`($${index * 3 + 1},$${index * 3 + 2},$${index * 3 + 3})`)
+    upsertParams.push(experimentId)
+    upsertParams.push(branch.value)
+    upsertParams.push(branch.probability)
+    upsertParams.push(branch.filter && branch.filter.trim() || null)
+    upsertValues.push(`($${index * 4 + 1},$${index * 4 + 2},$${index * 4 + 3},$${index * 4 + 4})`)
+
+    deleteParams.push(branch.value)
+    deleteValues.push(`$${index + 2}`)
   })
-  await db.query(`INSERT INTO branches (experiment_id, branch, probability) VALUES ${values}`, params)
+  await db.query(`
+    INSERT INTO branches (experiment_id, branch, probability, filter) VALUES ${upsertValues}
+    ON CONFLICT (experiment_id, branch) DO UPDATE
+      SET probability = excluded.probability, filter = excluded.filter`,
+    upsertParams)
+  
+  // Delete other branches
+  await db.query(`DELETE FROM branches WHERE experiment_id = $1 AND branch NOT IN (${deleteValues})`, deleteParams)
 }
 
 async function experimentQuery(db, userId, experimentId, uuid) {
@@ -155,7 +178,7 @@ async function experimentQuery(db, userId, experimentId, uuid) {
   }
   const rs = await db.query(`
     SELECT e.experiment_uuid, e.title, e.description, e.request_ttl, e.running, e.hits,
-      b.branch, b.probability, b.last_used
+      b.branch, b.probability, b.last_used, b.filter
     FROM experiments e
       LEFT JOIN branches b ON e.experiment_id = b.experiment_id
     WHERE e.user_id = $1
@@ -187,7 +210,8 @@ async function experimentQuery(db, userId, experimentId, uuid) {
       experiment.branches.push({
         value: rows[index].branch,
         probability: rows[index].probability,
-        lastUsed: rows[index].last_used
+        lastUsed: rows[index].last_used,
+        filter: rows[index].filter
       })
       index++
     }

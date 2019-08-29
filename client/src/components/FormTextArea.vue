@@ -2,7 +2,7 @@
 <template>
   <div class="form-component">
     <label v-if="label">{{ label }}<span class="required" v-if=required>*</span></label>
-    <textarea :id="id" ref="input" :type="type" :rows="rows" :cols="cols" :placeholder="placeholder" v-model="inputVal"
+    <textarea :id="id" ref="input" :rows="rows" :cols="cols" :placeholder="placeholder" v-model="inputVal" :class="classes"
         @blur="blur" @focus="focus" @change="change"></textarea>
     <div v-if="hint" class="hint">{{ hint }}</div>
     <div v-if="errorMsg" class="error-message">{{ errorMsg }}</div>
@@ -21,7 +21,11 @@ export default {
     value: String,
     errorMsg: String,
     autofocus: Boolean,
-    hint: String
+    hint: String,
+    classes: {
+      type: String,
+      default: ''
+    },
   },
   data() {
     return {

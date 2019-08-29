@@ -270,4 +270,8 @@ i {
   cursor: pointer;
   transition: all 0.5s;
 }
+
+textarea.description-text {
+  min-height: 100px !important;
+}
 </style>

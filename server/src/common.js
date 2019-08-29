@@ -122,9 +122,19 @@ function nullOrUndefined(value) {
   return value === null || value === undefined
 }
 
+function hashCode(str) {
+  let i
+  let h = 0
+  for (i = 0; i < str.length; i++) {
+    h = Math.imul(31, h) + str.charCodeAt(i) | 0
+  }
+  return h
+}
+
 module.exports = {
   generateDbPassword,
   getCookie,
+  hashCode,
   inputErrorMessage,
   nullOrUndefined,
   sessionTokenName,

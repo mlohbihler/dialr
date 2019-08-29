@@ -4,6 +4,7 @@
  * Creates a cache of data from the database to avoid having to make
  * regular hits for data that should rarely change.
  */
+const { compileExpression } = require('filtrex')
 const { jobPipeline, singleInstance, timer } = require('../pipeline')
 
 module.exports = async opts => {
@@ -47,7 +48,7 @@ async function load(opts) {
     const experimentPromise = db.query(`
       SELECT u.user_id, u.active AS user_active,
         e.experiment_id, e.experiment_uuid, e.request_ttl, e.running, e.active AS experiment_active,
-        b.branch, b.probability
+        b.branch, b.probability, b.filter
       FROM users u
         JOIN experiments e ON u.user_id = e.user_id
         LEFT JOIN branches b ON e.experiment_id = b.experiment_id
@@ -90,17 +91,17 @@ async function load(opts) {
       const experiment = {
         experimentId: experimentBranches[index].experiment_id,
         ttl: experimentBranches[index].request_ttl,
-        branches: [],
-        probabilitySum: 0
+        branches: []
       }
 
       // Iterate over all the branches
       while (index < experimentBranches.length && uuid === experimentBranches[index].experiment_uuid) {
+        const exp = experimentBranches[index]
         experiment.branches.push({
-          value: experimentBranches[index].branch,
-          probability: experimentBranches[index].probability
+          value: exp.branch,
+          probability: exp.probability,
+          filter: exp.filter ? compileExpression(exp.filter) : () => 1
         })
-        experiment.probabilitySum += experimentBranches[index].probability
         index++
       }
 

@@ -68,6 +68,7 @@ module.exports.get = async (req, res) => {
     const rand = Math.floor(random() * probabilitySum) + 1
     // TODO could also use a hash of the requestId as the rand, which would make
     // the branch more deterministic for the client code.
+    // const rand = Math.abs(hashCode(requestId)) % probabilitySum + 1
     let branch
     let sum = 0
     let index = 0

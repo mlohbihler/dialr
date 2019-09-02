@@ -11,7 +11,7 @@ function die(req, res, err) {
   if (process.env.NODE_ENV !== 'development') {
     sendEmail({
       to: process.env.startupEmailTo,
-      subject: 'Dialr error',
+      subject: 'DiaLR error',
       text: err.stack
     })
   }

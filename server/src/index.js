@@ -26,7 +26,7 @@ const logger = createLogger({
   ]
 })
 
-logger.info('Dialr starting...')
+logger.info('DiaLR starting...')
 const migrateAndStart = require('pg-migration')['default']({
   log: (level, message) => {
     if (level === 'debug') {
@@ -82,7 +82,7 @@ async function sendStartupEmail(err) {
 
   sendEmail({
     to: process.env.startupEmailTo,
-    subject: err ? 'Error starting Dialr' : 'Dialr startup successful',
+    subject: err ? 'Error starting DiaLR' : 'DiaLR startup successful',
     text,
   })
 }

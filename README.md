@@ -1,4 +1,4 @@
-# dialr
+# DiaLR
 DiaLR is a live deployment service that helps you manage tricky deployments, allowing you
 to control their release in real time. Get started now using our [free trial cloud service](https://dialr.serotonin.ai).
 

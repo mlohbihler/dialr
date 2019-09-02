@@ -148,7 +148,7 @@ module.exports.requestPasswordReset = (req, res) => {
 
     await sendUiEmail({
       to: email,
-      subject: 'Dialr password reset',
+      subject: 'DiaLR password reset',
       textTemplate: 'passwordResetEmail.hbs',
       data: {
         email,
@@ -184,7 +184,7 @@ module.exports.resetPassword = (req, res) => {
 async function sendVerificationEmail(email, url, logger, errorCode) {
   await sendUiEmail({
     to: email,
-    subject: 'Verify Your Dialr Account',
+    subject: 'Verify Your DiaLR Account',
     textTemplate: 'verificationEmail.hbs',
     data: {
       email,

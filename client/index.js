@@ -13,12 +13,12 @@ module.exports = config => {
       })
       const { data } = response
       if (data.error) {
-        console.warn('Error in DialR call', data.error)
+        console.warn('Error in DiaLR call', data.error)
         return def
       }
       return data.branch
     } catch (err) {
-      console.error('DialR call failed', err)
+      console.error('DiaLR call failed', err)
       return def
     }
   }

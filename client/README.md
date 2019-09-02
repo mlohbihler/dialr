@@ -1,7 +1,7 @@
-This folder includes sample code for a Node-based DialR client that can be included in your Node code, or modified to your needs.
+This folder includes sample code for a Node-based DiaLR client that can be included in your Node code, or modified to your needs.
 
 ```javascript
-// First, create the DialR client, providing the host and access key.
+// First, create the DiaLR client, providing the host and access key.
 const dialr = require('./index')({
   host: 'http://localhost:3000',
   accessKey: 'p9gGsIaM9sUJcWGooVSkzVfEWONROckG'

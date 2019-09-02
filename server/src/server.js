@@ -110,7 +110,7 @@ module.exports = options => {
   const port = process.env.PORT || 3000
   httpServer.listen(port, () => {
     // Confirm that the server started ok
-    logger.info(`Dialr HTTP server started on: ${port}`)
+    logger.info(`DiaLR HTTP server started on: ${port}`)
   })
 
   // Certificates
@@ -124,9 +124,9 @@ module.exports = options => {
     const httpsServer = https.createServer(credentials, app)
     const sslPort = process.env.SSL_PORT || 3443
     httpsServer.listen(sslPort, () => {
-      logger.info(`Dialr HTTPS server started on: ${sslPort}`)
+      logger.info(`DiaLR HTTPS server started on: ${sslPort}`)
     })
   } catch (err) {
-    logger.info('Dialr HTTPS server not started')
+    logger.info('DiaLR HTTPS server not started')
   }
 }

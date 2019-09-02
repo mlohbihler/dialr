@@ -1,7 +1,7 @@
 {
   "name": "dialr",
   "version": "1.0.0",
-  "description": "Dialr Live Deployment Service",
+  "description": "DiaLR Live Deployment Service",
   "main": "src/index.js",
   "author": "Serotonin Software",
   "license": "MIT",

@@ -12,7 +12,8 @@ import { gapi } from '@/util'
 export default {
   async mounted() {
     const logoutPromise = dele('/session')
-    const signoutPromise = gapi().auth2.getAuthInstance().signOut()
+    const auth = gapi().auth2.getAuthInstance()
+    const signoutPromise = (auth && auth.signOut()) || Promise.resolve()
 
     await Promise.all([logoutPromise, signoutPromise])
 

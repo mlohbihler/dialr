@@ -45,9 +45,10 @@
     </p>
     <p>
       DiaLR is open source code, so you can download and install it to run in your own environment.
-      But you can also use a super-fast <a href="https://dialr.org">cloud version</a> of it too. As
-      you'll see, DiaLR can be (and should be!) configured with values that are only meaningful to
-      you, so you never need to share sensitive data.
+      But you can also use a <a href="https://dialr.serotonin.ai">trial cloud version</a> of it too.
+      And if you like this cloud version, you'll love the super-fast paid version of it too. Ask us
+      about it. A quick side note: as you'll see, DiaLR can be (and should be!) configured with values
+      that are only meaningful to you, so you never need to share sensitive data.
     </p>
   </div>
 </template>

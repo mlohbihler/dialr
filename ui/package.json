@@ -1,13 +1,14 @@
 {
-  "name": "dialr-client",
-  "version": "0.1.0",
-  "private": true,
+  "name": "dialr-ui",
+  "version": "1.0.0",
   "scripts": {
     "start": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "test:unit": "vue-cli-service test:unit"
   },
+  "license": "MIT",
+  "repository": "https://github.com/mlohbihler/dialr.git",
   "dependencies": {
     "axios": "^0.19.0",
     "core-js": "^2.6.5",

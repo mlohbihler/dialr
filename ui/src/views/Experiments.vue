@@ -44,7 +44,7 @@
                       :errorMsg="editExperimentTitleError"/>
                   <FormCheck label="Running" required placeholder="Is this experiment currently running" v-model="editExperimentRunning"/>
                   <FormText label="Request TTL" required type="text" v-model="editExperimentTtl" :errorMsg="editExperimentTtlError"
-                      hint="The max amount of time that requests are expected to last"/>
+                      hint="The max amount of time in seconds that requests are expected to last"/>
                   <FormTextArea label="Description" :rows="5" placeholder="Long description of the experiment" classes="description-text"
                       v-model="editExperimentDescription" :errorMsg="editExperimentDescriptionError"/>
                 </div>
@@ -355,7 +355,7 @@ export default {
         } else if (result.error.code === 'experiments-upsert-14') {
           this.editBranchError = 'All branch values must be unique'
         } else if (result.error.code === 'experiments-upsert-15') {
-          this.editBranchError = 'Probability sum must be greater than 0'
+          this.editBranchError = 'You must have an unfiltered branch'
         } else {
           this.editBranchError = result.error.message
         }

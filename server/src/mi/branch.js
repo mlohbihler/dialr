@@ -15,14 +15,15 @@
  * endpoint in the UI routes.
  *
  * Parameters are as follows:
- * - `uuid`: the ID of the experiment, provisioned using the `/experiments`
- *           endpoint in the UI routes. This parameter is required.
+ * - `eid`: the UUID of the experiment, provisioned using the `/experiments`
+ *          endpoint in the UI routes. This parameter is required.
  * - `rid`: the request id. This value allows multiple requests to this
  *          interface to result in the same response value. It is a required
  *          parameter even if your code only makes a single call to this
  *          interface per request.
  * - `outcome`: this parameter is optional. It can be used to track the outcome
  *              of a particular request (error messages, return values, etc).
+ * Other parameters become the filter context.
  */
 const { hashCode, tie } = require('../common')
 const { ensureExists } = require('../ensure')
@@ -35,7 +36,7 @@ module.exports.get = async (req, res) => {
 
   const accessKey = ensureExists(req.headers['x-access-key'], 'branch-1', 'accessKey empty or not provided')
   const userId = ensureExists(accessKeys[accessKey], 'branch-2', 'Invalid accessKey')
-  const experimentUuid = ensureExists(req.query.uuid, 'branch-3', 'uuid empty or not provided')
+  const experimentUuid = ensureExists(req.query.eid, 'branch-3', 'eid empty or not provided')
   const requestId = ensureExists(req.query.rid, 'branch-4', 'rid (request id) empty or not provided')
   const outcome = req.query.outcome
   let experiment
@@ -49,8 +50,8 @@ module.exports.get = async (req, res) => {
     logger.info('Branch cache miss')
 
     // Didn't find the request locally. Find the experiment.
-    const userExperiments = ensureExists(experiments[userId], 'branch-5', 'Invalid uuid')
-    experiment = ensureExists(userExperiments[experimentUuid], 'branch-5', 'Invalid uuid')
+    const userExperiments = ensureExists(experiments[userId], 'branch-5', 'Invalid eid')
+    experiment = ensureExists(userExperiments[experimentUuid], 'branch-5', 'Invalid eid')
 
     // Pick a branch from the experiment.
     const { branches } = experiment
@@ -65,16 +66,20 @@ module.exports.get = async (req, res) => {
       }
       return false
     })
-    const rand = Math.floor(random() * probabilitySum) + 1
-    // TODO could also use a hash of the requestId as the rand, which would make
-    // the branch more deterministic for the client code.
-    // const rand = Math.abs(hashCode(requestId)) % probabilitySum + 1
     let branch
-    let sum = 0
-    let index = 0
-    while (rand > sum && index < filteredBranches.length) {
-      branch = filteredBranches[index++]
-      sum += branch.probability
+    if (probabilitySum > 0) {
+      const rand = Math.floor(random() * probabilitySum) + 1
+      // TODO could also use a hash of the requestId as the rand, which would make
+      // the branch more deterministic for the client code.
+      // const rand = Math.abs(hashCode(requestId)) % probabilitySum + 1
+      let sum = 0
+      let index = 0
+      while (rand > sum && index < filteredBranches.length) {
+        branch = filteredBranches[index++]
+        sum += branch.probability
+      }
+    } else {
+      branch = filteredBranches[0]
     }
 
     // Check the database for the request.

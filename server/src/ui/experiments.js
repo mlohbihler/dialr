@@ -111,7 +111,7 @@ function validateExperimentInput(user, body) {
     tie('experiments-upsert-9', `An experiment must have at least 1 branch, and not more than your maximum of ${user.max_branches}`)
   }
   const valueSet = new Set()
-  let probabilitySum = 0
+  let unfiltered = false
   branches.forEach(branch => {
     ensureString(branch.value, 'experiments-upsert-10', `Missing or invalid 'branch.value'`)
     ensureStringLength(branch.value, 1, 10, 'experiments-upsert-11', `'branch.value' must be 1-10 characters`)
@@ -130,14 +130,14 @@ function validateExperimentInput(user, body) {
         tie('experiments-upsert-17', err.message)
       }
     } else {
-      probabilitySum += branch.probability
+      unfiltered = true
     }
   })
   if (valueSet.size !== branches.length) {
     tie('experiments-upsert-14', `All branch values must be unique`)
   }
-  if (probabilitySum < 1) {
-    tie('experiments-upsert-15', `Unfiltered probability sum must be > 0`)
+  if (!unfiltered) {
+    tie('experiments-upsert-15', `You must include an unfiltered branch`)
   }
 }
 

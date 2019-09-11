@@ -12,7 +12,11 @@
       </template>
     </div>
     <router-view/>
-    <footer>&copy; Serotonin Software 2019</footer>
+    <footer>
+      &copy; Serotonin Software 2019 |
+      <router-link :to="{ name: 'privacy' }">Privacy</router-link> |
+      <router-link :to="{ name: 'termsOfService' }">Terms of Service</router-link>
+    </footer>
   </div>
 </template>
 

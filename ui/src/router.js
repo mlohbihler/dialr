@@ -1,11 +1,13 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-import Home from '@/views/Home'
 import AccessKeys from '@/views/AccessKeys'
 import Experiments from '@/views/Experiments'
+import Home from '@/views/Home'
 import Login from '@/views/Login'
 import Logout from '@/views/Logout'
+import Privacy from '@/views/Privacy'
+import TermsOfService from '@/views/TermsOfService'
 
 import store from './store'
 import { refreshUserData } from './util'
@@ -60,6 +62,11 @@ export default new Router({
       component: Logout
     },
     {
+      path: '/privacy',
+      name: 'privacy',
+      component: Privacy
+    },
+    {
       path: '/register',
       name: 'register',
       component: () => import(/* webpackChunkName: "register" */ '@/views/Register')
@@ -78,6 +85,11 @@ export default new Router({
       path: '/reset-password/:token',
       name: 'resetPassword',
       component: () => import(/* webpackChunkName: "register" */ '@/views/ResetPassword')
+    },
+    {
+      path: '/termsOfService',
+      name: 'termsOfService',
+      component: TermsOfService
     },
     {
       path: '*',

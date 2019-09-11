@@ -87,7 +87,7 @@ export default new Router({
       component: () => import(/* webpackChunkName: "register" */ '@/views/ResetPassword')
     },
     {
-      path: '/termsOfService',
+      path: '/terms-of-service',
       name: 'termsOfService',
       component: TermsOfService
     },

@@ -25,7 +25,7 @@
  *              of a particular request (error messages, return values, etc).
  * Other parameters become the filter context.
  */
-const { hashCode, tie } = require('../common')
+const { tie } = require('../common')
 const { ensureExists } = require('../ensure')
 const { now, random } = require('../indeterminant')
 const { respond } = require('../responses')

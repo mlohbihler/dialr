@@ -95,15 +95,15 @@ module.exports.glogin = (req, res) => {
       // could already be registered.
       await db.query(`
         INSERT INTO users (google_id, email) VALUES ($1, $2)
-        ON CONFLICT (email) DO UPDATE SET google_id = $1`,
-        [googleId, email])
-      
+        ON CONFLICT (email) DO UPDATE SET google_id = $1
+        `, [googleId, email])
+
       // Now, reload the user data using the query
       rs = await db.query(`${userQuery} WHERE u.google_id = $1`, [googleId])
     } else {
       // The googleId was found. Ensure that the email address has not changed.
       const u = rs.rows[0]
-      
+
       if (u.email !== email) {
         // The email address has changed. This can be a problem if the new email address is already
         // registered. Look for a user record with the new address.
@@ -111,7 +111,7 @@ module.exports.glogin = (req, res) => {
         if (dupRs.rows.length) {
           // Yup, the email address already exists. Assign all of the data owned by the old id to
           // the new, delete the old row, and then update the email address of the new.
-          const oldId = duprs.rows[0].user_id
+          const oldId = dupRs.rows[0].user_id
           await db.query(`UPDATE access_keys SET user_id = $1 WHERE user_id = $2`, [u.user_id, oldId])
           await db.query(`UPDATE experiments SET user_id = $1 WHERE user_id = $2`, [u.user_id, oldId])
           await db.query(`DELETE FROM users WHERE user_id = $1`, [oldId])

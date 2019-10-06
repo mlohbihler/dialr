@@ -151,7 +151,7 @@ async function updateBranches(experimentId, branches, db) {
     upsertParams.push(experimentId)
     upsertParams.push(branch.value)
     upsertParams.push(branch.probability)
-    upsertParams.push(branch.filter && branch.filter.trim() || null)
+    upsertParams.push((branch.filter && branch.filter.trim()) || null)
     upsertValues.push(`($${index * 4 + 1},$${index * 4 + 2},$${index * 4 + 3},$${index * 4 + 4})`)
 
     deleteParams.push(branch.value)
@@ -160,9 +160,9 @@ async function updateBranches(experimentId, branches, db) {
   await db.query(`
     INSERT INTO branches (experiment_id, branch, probability, filter) VALUES ${upsertValues}
     ON CONFLICT (experiment_id, branch) DO UPDATE
-      SET probability = excluded.probability, filter = excluded.filter`,
-    upsertParams)
-  
+      SET probability = excluded.probability, filter = excluded.filter
+    `, upsertParams)
+
   // Delete other branches
   await db.query(`DELETE FROM branches WHERE experiment_id = $1 AND branch NOT IN (${deleteValues})`, deleteParams)
 }

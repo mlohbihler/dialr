@@ -38,7 +38,7 @@ module.exports.list = (req, res) => {
       accessKey: row.access_key,
       created: row.created,
       lastUsed: row.last_used
-    }))})
+    })) })
   })
 }
 
